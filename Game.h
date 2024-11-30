@@ -1,4 +1,5 @@
 #pragma once
+#include "FlyFish.h"
 #include "structs.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
@@ -60,6 +61,10 @@ private:
 	bool m_Initialized;
 	// Prevent timing jumps when debugging
 	const float m_MaxElapsedSeconds;
+
+	ThreeBlade m_PlayerPosition = ThreeBlade{ 100, 200, 0, 1 };
+	ThreeBlade m_PillarPosition;
+	
 	
 	// FUNCTIONS
 	void InitializeGameEngine( );

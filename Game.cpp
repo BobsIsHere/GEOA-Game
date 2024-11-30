@@ -101,6 +101,8 @@ void Game::InitializeGameEngine()
 	}
 
 	m_Initialized = true;
+
+	m_PillarPosition = ThreeBlade{ m_Viewport.left + m_Viewport.width / 2, m_Viewport.left + m_Viewport.height / 2, 0,1 };
 }
 
 void Game::Run()
@@ -193,8 +195,25 @@ void Game::CleanupGameEngine()
 
 void Game::Update(float elapsedSec)
 {
+	Motor pillatTrans{ Motor::Translation(m_PillarPosition.VNorm(), TwoBlade{ 0, 0, 0, 0, 1, 0})};
+
+	Motor translator{ Motor::Translation(100 * elapsedSec, TwoBlade{ 1, 0, 0, 0, 0, 0 }) };
+	m_PlayerPosition = (translator * m_PlayerPosition * ~translator).Grade3();  
+
+	Motor originRotation{ Motor::Rotation(45 * elapsedSec, TwoBlade{ 0, 0, 0, 0, 0, -1 }) };
+	Motor rotation{pillatTrans * originRotation * ~pillatTrans}; 
+
+	m_PlayerPosition = (rotation * m_PlayerPosition * ~rotation).Grade3(); 
 }
 
 void Game::Draw() const
 {
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	utils::SetColor(Color4f{ 0.f, 0.f, 1.f, 1.0f });
+	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1],40,40);
+
+	utils::SetColor(Color4f{ 1.f, 0.f, 1.f, 1.f });
+	utils::FillRect(m_PillarPosition[0], m_PillarPosition[1], 20, 20);
 }

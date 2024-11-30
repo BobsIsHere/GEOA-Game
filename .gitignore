@@ -33,4 +33,4 @@
 .vs/
 
 # Build Files
-src/out/
+out/
