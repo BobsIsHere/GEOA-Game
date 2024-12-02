@@ -17,6 +17,7 @@ Game::Game(const Window& window)
 	, m_MaxElapsedSeconds{ 0.1f }
 {
 	InitializeGameEngine();
+	InitializeGameVariables();
 }
 
 Game::~Game()
@@ -101,8 +102,11 @@ void Game::InitializeGameEngine()
 	}
 
 	m_Initialized = true;
+}
 
-	m_PillarPosition = ThreeBlade{ m_Viewport.left + m_Viewport.width / 2, m_Viewport.left + m_Viewport.height / 2, 0,1 };
+void Game::InitializeGameVariables()
+{
+	m_PillarPosition = ThreeBlade{ 500, 500, 100, 1 };
 }
 
 void Game::Run()
@@ -195,15 +199,20 @@ void Game::CleanupGameEngine()
 
 void Game::Update(float elapsedSec)
 {
-	Motor pillatTrans{ Motor::Translation(m_PillarPosition.VNorm(), TwoBlade{ 0, 0, 0, 0, 1, 0})};
+	// Normalize the pillar position
+	m_PillarPosition = m_PillarPosition.Normalize();
 
-	Motor translator{ Motor::Translation(100 * elapsedSec, TwoBlade{ 1, 0, 0, 0, 0, 0 }) };
-	m_PlayerPosition = (translator * m_PlayerPosition * ~translator).Grade3();  
+	// Translate to origin
+	Motor translatorToOrigin{ Motor::Translation(-1 * m_PillarPosition.VNorm(), TwoBlade{m_PillarPosition[0], m_PillarPosition[1], 0, 0, 0, 0}) };
+	m_PlayerPosition = (translatorToOrigin * m_PlayerPosition * ~translatorToOrigin).Grade3(); 
 
-	Motor originRotation{ Motor::Rotation(45 * elapsedSec, TwoBlade{ 0, 0, 0, 0, 0, -1 }) };
-	Motor rotation{pillatTrans * originRotation * ~pillatTrans}; 
-
+	// Rotate around origin
+	Motor rotation{ Motor::Rotation(45 * elapsedSec, TwoBlade{ 0, 0, 0, 0, 0, 1 }) };
 	m_PlayerPosition = (rotation * m_PlayerPosition * ~rotation).Grade3(); 
+
+	// Translate back
+	Motor translatorBack{ Motor::Translation(m_PillarPosition.VNorm(), TwoBlade{m_PillarPosition[0], m_PillarPosition[1], 0, 0, 0, 0}) };
+	m_PlayerPosition = (translatorBack * m_PlayerPosition * ~translatorBack).Grade3(); 
 }
 
 void Game::Draw() const

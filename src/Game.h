@@ -67,6 +67,7 @@ private:
 	
 	
 	// FUNCTIONS
-	void InitializeGameEngine( );
-	void CleanupGameEngine( );
+	void InitializeGameEngine();
+	void InitializeGameVariables();
+	void CleanupGameEngine();
 };
