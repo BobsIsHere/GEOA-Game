@@ -62,12 +62,18 @@ private:
 	// Prevent timing jumps when debugging
 	const float m_MaxElapsedSeconds;
 
-	ThreeBlade m_PlayerPosition = ThreeBlade{ 100, 200, 0, 1 };
+	const int m_PlayerDimensions = 40;
+
+	ThreeBlade m_PlayerPosition;
 	ThreeBlade m_PillarPosition;
+	ThreeBlade m_PlayerVelocity;
 	
 	
 	// FUNCTIONS
 	void InitializeGameEngine();
 	void InitializeGameVariables();
 	void CleanupGameEngine();
+
+	ThreeBlade Translate(ThreeBlade player, ThreeBlade velocity, float elapsedSec);
+	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);
 };

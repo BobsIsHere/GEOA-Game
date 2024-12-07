@@ -106,7 +106,9 @@ void Game::InitializeGameEngine()
 
 void Game::InitializeGameVariables()
 {
-	m_PillarPosition = ThreeBlade{ 500, 500, 100, 1 };
+	m_PlayerPosition = ThreeBlade{ 200, 300, 0, 1 };
+	m_PillarPosition = ThreeBlade{ 500, 400, 0, 1 };
+	m_PlayerVelocity = ThreeBlade{ 400, 400, 0, 1 };
 }
 
 void Game::Run()
@@ -194,25 +196,66 @@ void Game::CleanupGameEngine()
 	//Quit SDL subsystems
 	TTF_Quit();
 	SDL_Quit();
+}
 
+ThreeBlade Game::Translate(ThreeBlade player, ThreeBlade velocity, float elapsedSec) 
+{
+	Motor translator{ Motor::Translation(velocity[0] * elapsedSec, TwoBlade{1, 0, 0, 0, 0, 0}) };
+	return (translator * player * ~translator).Grade3();
+}
+
+ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle)
+{
+	// Normalize the pillar position
+	pillar = pillar.Normalize();
+
+	// Translate to origin
+	Motor translatorToOrigin{ Motor::Translation(-1 * pillar.VNorm(), TwoBlade{pillar[0], pillar[1], 0, 0, 0, 0}) };
+	player = (translatorToOrigin * player * ~translatorToOrigin).Grade3();
+
+	// Rotate around origin
+	Motor rotation{ Motor::Rotation(angle, TwoBlade{ 0, 0, 0, 0, 0, 1 }) };
+	player = (rotation * player * ~rotation).Grade3();
+
+	// Translate back
+	Motor translatorBack{ Motor::Translation(pillar.VNorm(), TwoBlade{pillar[0], pillar[1], 0, 0, 0, 0}) };
+	player = (translatorBack * player * ~translatorBack).Grade3();
+
+	return player;
 }
 
 void Game::Update(float elapsedSec)
 {
-	// Normalize the pillar position
-	m_PillarPosition = m_PillarPosition.Normalize();
+	//float rotationAngle{ 45 * elapsedSec };
+	//m_PlayerPosition = RotateAroundPillar(m_PlayerPosition, m_PillarPosition, rotationAngle); 
 
-	// Translate to origin
-	Motor translatorToOrigin{ Motor::Translation(-1 * m_PillarPosition.VNorm(), TwoBlade{m_PillarPosition[0], m_PillarPosition[1], 0, 0, 0, 0}) };
-	m_PlayerPosition = (translatorToOrigin * m_PlayerPosition * ~translatorToOrigin).Grade3(); 
+	m_PlayerPosition = Translate(m_PlayerPosition, m_PlayerVelocity, elapsedSec);
 
-	// Rotate around origin
-	Motor rotation{ Motor::Rotation(45 * elapsedSec, TwoBlade{ 0, 0, 0, 0, 0, 1 }) };
-	m_PlayerPosition = (rotation * m_PlayerPosition * ~rotation).Grade3(); 
+	// Check for collision of left side of the window
+	if (m_PlayerPosition[0] < 0)
+	{
+		m_PlayerPosition[0] = 0;
+		m_PlayerVelocity[0] *= -1;
+	}
+	// Check for collision of right side of the window
+	else if (m_PlayerPosition[0] > m_Window.width - m_PlayerDimensions)
+	{
+		m_PlayerPosition[0] = m_Window.width - m_PlayerDimensions;
+		m_PlayerVelocity[0] *= -1;
+	}
 
-	// Translate back
-	Motor translatorBack{ Motor::Translation(m_PillarPosition.VNorm(), TwoBlade{m_PillarPosition[0], m_PillarPosition[1], 0, 0, 0, 0}) };
-	m_PlayerPosition = (translatorBack * m_PlayerPosition * ~translatorBack).Grade3(); 
+	// Check for collision of bottom side of the window
+	if (m_PlayerPosition[1] < 0)
+	{
+		m_PlayerPosition[1] = 0;
+		m_PlayerVelocity[1] *= -1;
+	}
+	// Check for collision of top side of the window
+	else if (m_PlayerPosition[1] > m_Window.height - m_PlayerDimensions)
+	{
+		m_PlayerPosition[1] = m_Window.height - m_PlayerDimensions; 
+		m_PlayerVelocity[1] *= -1;
+	}
 }
 
 void Game::Draw() const
