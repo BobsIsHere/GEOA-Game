@@ -26,7 +26,7 @@ public:
 	{
 		if (e.keysym.sym == SDLK_LSHIFT) 
 		{
-			if (!m_HasShiftBeenPressed && m_CooldownTimer <= 0.0f && m_PlayerPosition[2] > m_PlayerMinEnergy) 
+			if (!m_HasShiftBeenPressed && m_CooldownTimer <= 0.0f && m_Player[2] > m_PlayerMinEnergy) 
 			{
 				m_HasShiftBeenPressed = true;
 				m_PlayerVelocity[0] *= 2;
@@ -87,7 +87,7 @@ private:
 
 	float m_CooldownTimer;
 
-	ThreeBlade m_PlayerPosition;
+	ThreeBlade m_Player;
 	ThreeBlade m_PillarPosition;
 	ThreeBlade m_PlayerVelocity;
 	

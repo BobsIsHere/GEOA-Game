@@ -108,7 +108,7 @@ void Game::InitializeGameVariables()
 {
 	m_HasShiftBeenPressed = false; 
 
-	m_PlayerPosition = ThreeBlade{ 200, 300, m_PlayerMaxEnergy, 1 }; 
+	m_Player = ThreeBlade{ 200, 300, m_PlayerMaxEnergy, 1 }; 
 	m_PillarPosition = ThreeBlade{ 500, 400, 0, 1 };
 	m_PlayerVelocity = ThreeBlade{ 400, 400, 0, 1 };
 }
@@ -231,36 +231,36 @@ void Game::Update(float elapsedSec)
 	//float rotationAngle{ 45 * elapsedSec };
 	//m_PlayerPosition = RotateAroundPillar(m_PlayerPosition, m_PillarPosition, rotationAngle); 
 
-	m_PlayerPosition = Translate(m_PlayerPosition, m_PlayerVelocity, elapsedSec);
+	m_Player = Translate(m_Player, m_PlayerVelocity, elapsedSec);
 
 	// Check for collision of left side of the window
-	if (m_PlayerPosition[0] < 0)
+	if (m_Player[0] < 0)
 	{
-		m_PlayerPosition[0] = 0;
+		m_Player[0] = 0;
 		m_PlayerVelocity[0] *= -1;
 	}
 	// Check for collision of right side of the window
-	else if (m_PlayerPosition[0] > m_Window.width - m_PlayerDimensions)
+	else if (m_Player[0] > m_Window.width - m_PlayerDimensions)
 	{
-		m_PlayerPosition[0] = m_Window.width - m_PlayerDimensions;
+		m_Player[0] = m_Window.width - m_PlayerDimensions;
 		m_PlayerVelocity[0] *= -1;
 	}
 
 	// Check for collision of bottom side of the window
-	if (m_PlayerPosition[1] < 0)
+	if (m_Player[1] < 0)
 	{
-		m_PlayerPosition[1] = 0;
+		m_Player[1] = 0;
 		m_PlayerVelocity[1] *= -1;
 	}
 	// Check for collision of top side of the window
-	else if (m_PlayerPosition[1] > m_Window.height - m_PlayerDimensions)
+	else if (m_Player[1] > m_Window.height - m_PlayerDimensions)
 	{
-		m_PlayerPosition[1] = m_Window.height - m_PlayerDimensions; 
+		m_Player[1] = m_Window.height - m_PlayerDimensions; 
 		m_PlayerVelocity[1] *= -1;
 	}
 
 	// Print out energy
-	std::cout << "Energy : " << m_PlayerPosition[2] << std::endl;
+	std::cout << "Energy : " << m_Player[2] << std::endl;
 
 	// Update cooldown timer if active
 	if (m_CooldownTimer > 0.0f)
@@ -271,9 +271,9 @@ void Game::Update(float elapsedSec)
 	// Increase or decrease Player's energy
 	if (m_HasShiftBeenPressed)
 	{
-		if (m_PlayerPosition[2] > m_PlayerMinEnergy)
+		if (m_Player[2] > m_PlayerMinEnergy)
 		{
-			m_PlayerPosition[2] = std::max(m_PlayerMinEnergy, m_PlayerPosition[2] - m_EnergyDrainSpeed * elapsedSec);
+			m_Player[2] = std::max(m_PlayerMinEnergy, m_Player[2] - m_EnergyDrainSpeed * elapsedSec);
 		}
 		else
 		{
@@ -284,9 +284,9 @@ void Game::Update(float elapsedSec)
 	}
 	else
 	{
-		if (m_PlayerPosition[2] < m_PlayerMaxEnergy)
+		if (m_Player[2] < m_PlayerMaxEnergy)
 		{
-			m_PlayerPosition[2] = std::min(m_PlayerPosition[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerMaxEnergy);
+			m_Player[2] = std::min(m_Player[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerMaxEnergy);
 		}
 	}
 }
@@ -296,8 +296,20 @@ void Game::Draw() const
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	utils::SetColor(Color4f{ 0.f, 0.f, 1.f, 1.0f });
-	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1],40,40);
+	Color4f lowEnergyColor = Color4f{ 1.0f, 0.0f, 0.0f, 1.0f };
+	Color4f highEnergyColor = Color4f{ 0.0f, 1.0f, 0.0f, 1.0f };
+
+	// Calculate the energy ratio (0.0 to 1.0)
+	float energyRatio = (m_Player[2] - m_PlayerMinEnergy) / (m_PlayerMaxEnergy - m_PlayerMinEnergy); 
+
+	// Interpolate the color based on the energy ratio
+	Color4f playerColor{};
+	playerColor.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r); 
+	playerColor.g = lowEnergyColor.g + energyRatio * (highEnergyColor.g - lowEnergyColor.g); 
+	playerColor.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b);
+
+	utils::SetColor(playerColor);
+	utils::FillRect(m_Player[0], m_Player[1],40,40);
 
 	utils::SetColor(Color4f{ 1.f, 0.f, 1.f, 1.f });
 	utils::FillRect(m_PillarPosition[0], m_PillarPosition[1], 20, 20);
