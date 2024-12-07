@@ -106,6 +106,8 @@ void Game::InitializeGameEngine()
 
 void Game::InitializeGameVariables()
 {
+	m_IsShiftStillPressed = false; 
+
 	m_PlayerPosition = ThreeBlade{ 200, 300, 0, 1 };
 	m_PillarPosition = ThreeBlade{ 500, 400, 0, 1 };
 	m_PlayerVelocity = ThreeBlade{ 400, 400, 0, 1 };

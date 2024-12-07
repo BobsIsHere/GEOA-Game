@@ -24,11 +24,19 @@ public:
 	// Event handling
 	void ProcessKeyDownEvent(const SDL_KeyboardEvent& e)
 	{
-
+		if (e.keysym.sym == SDLK_LSHIFT && !m_IsShiftStillPressed) 
+		{
+			m_IsShiftStillPressed = true;
+			m_PlayerVelocity[0] *= 2;
+		}
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
 	{
-
+		if (e.keysym.sym == SDLK_LSHIFT && m_IsShiftStillPressed)
+		{
+			m_IsShiftStillPressed = false;
+			m_PlayerVelocity[0] /= 2;
+		}
 	}
 	void ProcessMouseMotionEvent(const SDL_MouseMotionEvent& e)
 	{
@@ -64,10 +72,11 @@ private:
 
 	const int m_PlayerDimensions = 40;
 
+	bool m_IsShiftStillPressed;
+
 	ThreeBlade m_PlayerPosition;
 	ThreeBlade m_PillarPosition;
 	ThreeBlade m_PlayerVelocity;
-	
 	
 	// FUNCTIONS
 	void InitializeGameEngine();
