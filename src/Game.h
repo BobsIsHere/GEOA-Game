@@ -24,18 +24,24 @@ public:
 	// Event handling
 	void ProcessKeyDownEvent(const SDL_KeyboardEvent& e)
 	{
-		if (e.keysym.sym == SDLK_LSHIFT && !m_IsShiftStillPressed) 
+		if (e.keysym.sym == SDLK_LSHIFT) 
 		{
-			m_IsShiftStillPressed = true;
-			m_PlayerVelocity[0] *= 2;
+			if (!m_HasShiftBeenPressed && m_CooldownTimer <= 0.0f && m_PlayerPosition[2] > m_PlayerMinEnergy) 
+			{
+				m_HasShiftBeenPressed = true;
+				m_PlayerVelocity[0] *= 2;
+			}
 		}
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
 	{
-		if (e.keysym.sym == SDLK_LSHIFT && m_IsShiftStillPressed)
+		if (e.keysym.sym == SDLK_LSHIFT)
 		{
-			m_IsShiftStillPressed = false;
-			m_PlayerVelocity[0] /= 2;
+			if (m_HasShiftBeenPressed)
+			{
+				m_HasShiftBeenPressed = false;
+				m_PlayerVelocity[0] /= 2;
+			}
 		}
 	}
 	void ProcessMouseMotionEvent(const SDL_MouseMotionEvent& e)
@@ -70,9 +76,16 @@ private:
 	// Prevent timing jumps when debugging
 	const float m_MaxElapsedSeconds;
 
+	bool m_HasShiftBeenPressed;
+
 	const int m_PlayerDimensions = 40;
 
-	bool m_IsShiftStillPressed;
+	const float m_PlayerMinEnergy = 0.f;
+	const float m_PlayerMaxEnergy = 100.0f;
+	const float m_EnergyDrainSpeed = 60.f;
+	const float m_CooldownDuration = 1.0f;
+
+	float m_CooldownTimer;
 
 	ThreeBlade m_PlayerPosition;
 	ThreeBlade m_PillarPosition;

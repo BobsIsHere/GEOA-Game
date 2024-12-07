@@ -106,9 +106,9 @@ void Game::InitializeGameEngine()
 
 void Game::InitializeGameVariables()
 {
-	m_IsShiftStillPressed = false; 
+	m_HasShiftBeenPressed = false; 
 
-	m_PlayerPosition = ThreeBlade{ 200, 300, 0, 1 };
+	m_PlayerPosition = ThreeBlade{ 200, 300, m_PlayerMaxEnergy, 1 }; 
 	m_PillarPosition = ThreeBlade{ 500, 400, 0, 1 };
 	m_PlayerVelocity = ThreeBlade{ 400, 400, 0, 1 };
 }
@@ -257,6 +257,37 @@ void Game::Update(float elapsedSec)
 	{
 		m_PlayerPosition[1] = m_Window.height - m_PlayerDimensions; 
 		m_PlayerVelocity[1] *= -1;
+	}
+
+	// Print out energy
+	std::cout << "Energy : " << m_PlayerPosition[2] << std::endl;
+
+	// Update cooldown timer if active
+	if (m_CooldownTimer > 0.0f)
+	{
+		m_CooldownTimer -= elapsedSec;
+	}
+
+	// Increase or decrease Player's energy
+	if (m_HasShiftBeenPressed)
+	{
+		if (m_PlayerPosition[2] > m_PlayerMinEnergy)
+		{
+			m_PlayerPosition[2] = std::max(m_PlayerMinEnergy, m_PlayerPosition[2] - m_EnergyDrainSpeed * elapsedSec);
+		}
+		else
+		{
+			m_HasShiftBeenPressed = false;
+			m_PlayerVelocity[0] /= 2;
+			m_CooldownTimer = m_CooldownDuration; 
+		}
+	}
+	else
+	{
+		if (m_PlayerPosition[2] < m_PlayerMaxEnergy)
+		{
+			m_PlayerPosition[2] = std::min(m_PlayerPosition[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerMaxEnergy);
+		}
 	}
 }
 
