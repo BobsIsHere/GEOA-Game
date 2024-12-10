@@ -7,15 +7,15 @@
 class Game
 {
 public:
-	explicit Game( const Window& window );
-	Game( const Game& other ) = delete;
-	Game& operator=( const Game& other ) = delete;
+	explicit Game(const Window& window);
+	Game(const Game& other) = delete;
+	Game& operator=(const Game& other) = delete;
 	Game(Game&& other) = delete;
 	Game& operator=(Game&& other) = delete;
 
 	~Game();
 
-	void Run( );
+	void Run();
 
 	void Update(float elapsedSec);
 
@@ -31,6 +31,11 @@ public:
 				m_HasShiftBeenPressed = true;
 				m_PlayerVelocity[0] *= 2;
 			}
+		}
+
+		if (e.keysym.sym == SDLK_r)
+		{
+			m_ShouldReflect = !m_ShouldReflect;
 		}
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
@@ -77,6 +82,7 @@ private:
 	const float m_MaxElapsedSeconds;
 
 	bool m_HasShiftBeenPressed;
+	bool m_ShouldReflect;
 
 	const int m_PlayerDimensions = 40;
 
@@ -95,7 +101,8 @@ private:
 	void InitializeGameEngine();
 	void InitializeGameVariables();
 	void CleanupGameEngine();
+	void ViewPortCollisionDetection();
 
-	ThreeBlade Translate(ThreeBlade player, ThreeBlade velocity, float elapsedSec);
+	Motor Translate(ThreeBlade velocity, float elapsedSec);
 	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);
 };

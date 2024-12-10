@@ -107,6 +107,7 @@ void Game::InitializeGameEngine()
 void Game::InitializeGameVariables()
 {
 	m_HasShiftBeenPressed = false; 
+	m_ShouldReflect = false;  
 
 	m_Player = ThreeBlade{ 200, 300, m_PlayerMaxEnergy, 1 }; 
 	m_PillarPosition = ThreeBlade{ 500, 400, 0, 1 };
@@ -200,10 +201,39 @@ void Game::CleanupGameEngine()
 	SDL_Quit();
 }
 
-ThreeBlade Game::Translate(ThreeBlade player, ThreeBlade velocity, float elapsedSec) 
+void Game::ViewPortCollisionDetection()
+{
+	// Check for collision of left side of the window
+	if (m_Player[0] < 0)
+	{
+		m_Player[0] = 0;
+		m_PlayerVelocity[0] *= -1;
+	}
+	// Check for collision of right side of the window
+	else if (m_Player[0] > m_Window.width - m_PlayerDimensions)
+	{
+		m_Player[0] = m_Window.width - m_PlayerDimensions;
+		m_PlayerVelocity[0] *= -1;
+	}
+
+	// Check for collision of bottom side of the window
+	if (m_Player[1] < 0)
+	{
+		m_Player[1] = 0;
+		m_PlayerVelocity[1] *= -1;
+	}
+	// Check for collision of top side of the window
+	else if (m_Player[1] > m_Window.height - m_PlayerDimensions)
+	{
+		m_Player[1] = m_Window.height - m_PlayerDimensions;
+		m_PlayerVelocity[1] *= -1;
+	}
+}
+
+Motor Game::Translate(ThreeBlade velocity, float elapsedSec)  
 {
 	Motor translator{ Motor::Translation(velocity[0] * elapsedSec, TwoBlade{1, 0, 0, 0, 0, 0}) };
-	return (translator * player * ~translator).Grade3();
+	return translator;
 }
 
 ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle)
@@ -231,33 +261,18 @@ void Game::Update(float elapsedSec)
 	//float rotationAngle{ 45 * elapsedSec };
 	//m_PlayerPosition = RotateAroundPillar(m_PlayerPosition, m_PillarPosition, rotationAngle); 
 
-	m_Player = Translate(m_Player, m_PlayerVelocity, elapsedSec);
-
-	// Check for collision of left side of the window
-	if (m_Player[0] < 0)
+	if (m_ShouldReflect) 
 	{
-		m_Player[0] = 0;
-		m_PlayerVelocity[0] *= -1;
+		m_Player = ((-1 * Translate(m_PlayerVelocity, elapsedSec)) * m_Player * ~Translate(m_PlayerVelocity, elapsedSec)).Grade3();
+		m_ShouldReflect = false; 
 	}
-	// Check for collision of right side of the window
-	else if (m_Player[0] > m_Window.width - m_PlayerDimensions)
+	else
 	{
-		m_Player[0] = m_Window.width - m_PlayerDimensions;
-		m_PlayerVelocity[0] *= -1;
+		m_Player = (Translate(m_PlayerVelocity, elapsedSec) * m_Player * ~Translate(m_PlayerVelocity, elapsedSec)).Grade3();
 	}
 
-	// Check for collision of bottom side of the window
-	if (m_Player[1] < 0)
-	{
-		m_Player[1] = 0;
-		m_PlayerVelocity[1] *= -1;
-	}
-	// Check for collision of top side of the window
-	else if (m_Player[1] > m_Window.height - m_PlayerDimensions)
-	{
-		m_Player[1] = m_Window.height - m_PlayerDimensions; 
-		m_PlayerVelocity[1] *= -1;
-	}
+	// Check for collision with the viewport
+	ViewPortCollisionDetection();  
 
 	// Print out energy
 	std::cout << "Energy : " << m_Player[2] << std::endl;
