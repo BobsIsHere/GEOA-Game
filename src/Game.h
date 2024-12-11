@@ -29,7 +29,7 @@ public:
 			if (!m_HasShiftBeenPressed && m_CooldownTimer <= 0.0f && m_Player[2] > m_PlayerMinEnergy) 
 			{
 				m_HasShiftBeenPressed = true;
-				m_PlayerVelocity[0] *= 2;
+				m_PlayerVelocity *= 2;
 			}
 		}
 
@@ -45,7 +45,7 @@ public:
 			if (m_HasShiftBeenPressed)
 			{
 				m_HasShiftBeenPressed = false;
-				m_PlayerVelocity[0] /= 2;
+				m_PlayerVelocity /= 2;
 			}
 		}
 	}
@@ -91,11 +91,11 @@ private:
 	const float m_EnergyDrainSpeed = 60.f;
 	const float m_CooldownDuration = 1.0f;
 
+	float m_PlayerVelocity;
 	float m_CooldownTimer;
 
 	ThreeBlade m_Player;
 	ThreeBlade m_PillarPosition;
-	ThreeBlade m_PlayerVelocity;
 	
 	// FUNCTIONS
 	void InitializeGameEngine();
@@ -103,6 +103,6 @@ private:
 	void CleanupGameEngine();
 	void ViewPortCollisionDetection();
 
-	Motor Translate(ThreeBlade velocity, float elapsedSec);
+	Motor Translate(float velocity, float elapsedSec);
 	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);
 };

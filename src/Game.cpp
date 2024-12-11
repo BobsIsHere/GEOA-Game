@@ -111,7 +111,7 @@ void Game::InitializeGameVariables()
 
 	m_Player = ThreeBlade{ 200, 300, m_PlayerMaxEnergy, 1 }; 
 	m_PillarPosition = ThreeBlade{ 500, 400, 0, 1 };
-	m_PlayerVelocity = ThreeBlade{ 400, 400, 0, 1 };
+	m_PlayerVelocity = 400.f;
 }
 
 void Game::Run()
@@ -207,32 +207,32 @@ void Game::ViewPortCollisionDetection()
 	if (m_Player[0] < 0)
 	{
 		m_Player[0] = 0;
-		m_PlayerVelocity[0] *= -1;
+		m_PlayerVelocity *= -1;
 	}
 	// Check for collision of right side of the window
 	else if (m_Player[0] > m_Window.width - m_PlayerDimensions)
 	{
 		m_Player[0] = m_Window.width - m_PlayerDimensions;
-		m_PlayerVelocity[0] *= -1;
+		m_PlayerVelocity *= -1;
 	}
 
 	// Check for collision of bottom side of the window
 	if (m_Player[1] < 0)
 	{
 		m_Player[1] = 0;
-		m_PlayerVelocity[1] *= -1;
+		m_PlayerVelocity *= -1;
 	}
 	// Check for collision of top side of the window
 	else if (m_Player[1] > m_Window.height - m_PlayerDimensions)
 	{
 		m_Player[1] = m_Window.height - m_PlayerDimensions;
-		m_PlayerVelocity[1] *= -1;
+		m_PlayerVelocity *= -1;
 	}
 }
 
-Motor Game::Translate(ThreeBlade velocity, float elapsedSec)  
+Motor Game::Translate(float velocity, float elapsedSec)  
 {
-	Motor translator{ Motor::Translation(velocity[0] * elapsedSec, TwoBlade{1, 0, 0, 0, 0, 0}) };
+	Motor translator{ Motor::Translation(velocity * elapsedSec, TwoBlade{1, 0, 0, 0, 0, 0}) };
 	return translator;
 }
 
@@ -263,7 +263,8 @@ void Game::Update(float elapsedSec)
 
 	if (m_ShouldReflect) 
 	{
-		m_Player = ((-1 * Translate(m_PlayerVelocity, elapsedSec)) * m_Player * ~Translate(m_PlayerVelocity, elapsedSec)).Grade3();
+		m_Player = (-m_PillarPosition * -Translate(m_PlayerVelocity, elapsedSec) * m_Player * ~Translate(m_PlayerVelocity, elapsedSec) * ~m_PillarPosition).Grade3();
+		m_Player[2] *= -1;
 		m_ShouldReflect = false; 
 	}
 	else
@@ -293,7 +294,7 @@ void Game::Update(float elapsedSec)
 		else
 		{
 			m_HasShiftBeenPressed = false;
-			m_PlayerVelocity[0] /= 2;
+			m_PlayerVelocity /= 2;
 			m_CooldownTimer = m_CooldownDuration; 
 		}
 	}
