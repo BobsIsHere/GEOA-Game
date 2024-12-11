@@ -111,8 +111,8 @@ void Game::InitializeGameVariables()
 	m_ShouldRotate = false; 
 
 	m_Player = ThreeBlade{ 200, 200, m_PlayerMaxEnergy, 1 }; 
-	m_Pillar1 = ThreeBlade{ 400, 300, 0, 1 }; 
-	m_Pillar2 = ThreeBlade{ 900, 500, 0, 1 };
+	m_Pillars.push_back(ThreeBlade{ 400, 300, 0, 1 });
+	m_Pillars.push_back(ThreeBlade{ 900, 500, 0, 1 });
 	m_PlayerVelocity = 400.f;
 
 	m_PlayerColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
@@ -286,11 +286,11 @@ void Game::Update(float elapsedSec)
 	if (m_ShouldRotate)
 	{
 		const float rotationAngle{ 45 * elapsedSec }; 
-		m_Player = RotateAroundPillar(m_Player, m_Pillar1, rotationAngle); 
+		m_Player = RotateAroundPillar(m_Player, m_Pillars[0], rotationAngle);
 	}
 	else if (m_ShouldReflect)  
 	{
-		m_Player = (-m_Pillar1 * -MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * ~m_Pillar1).Grade3();
+		m_Player = (-m_Pillars[0] * -MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * ~m_Pillars[0]).Grade3(); 
 		m_Player[2] *= -1;
 		m_ShouldReflect = false; 
 	}
@@ -348,9 +348,9 @@ void Game::Draw() const
 	utils::SetColor(m_PlayerColor);
 	utils::FillRect(m_Player[0], m_Player[1], m_PlayerDimensions, m_PlayerDimensions);
 
-	utils::SetColor(m_PillarColor);
-	utils::FillRect(m_Pillar1[0], m_Pillar1[1], m_PillarDimensions, m_PillarDimensions);
-
-	utils::SetColor(m_PillarColor);  
-	utils::FillRect(m_Pillar2[0], m_Pillar2[1], m_PillarDimensions, m_PillarDimensions);
+	for (size_t idx = 0; idx < m_Pillars.size(); ++idx)
+	{
+		utils::SetColor(m_PillarColor);
+		utils::FillRect(m_Pillars[idx][0], m_Pillars[idx][1], m_PillarDimensions, m_PillarDimensions);
+	}
 }

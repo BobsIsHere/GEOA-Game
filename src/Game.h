@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 #include "FlyFish.h"
 #include "structs.h"
 #include "SDL.h"
@@ -106,9 +107,8 @@ private:
 	float m_PlayerVelocity;
 	float m_CooldownTimer;
 
+	std::vector<ThreeBlade> m_Pillars; 
 	ThreeBlade m_Player;
-	ThreeBlade m_Pillar1; 
-	ThreeBlade m_Pillar2;
 
 	Color4f m_PlayerColor; 
 	Color4f m_PillarColor; 
