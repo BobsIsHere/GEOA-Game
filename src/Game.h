@@ -33,9 +33,19 @@ public:
 			}
 		}
 
-		if (e.keysym.sym == SDLK_r)
+		if (e.keysym.sym == SDLK_SPACE) 
 		{
 			m_ShouldReflect = !m_ShouldReflect;
+		}
+
+		if (e.keysym.sym == SDLK_r)
+		{
+			m_ShouldRotate = !m_ShouldRotate; 
+		}
+
+		if (e.keysym.sym == SDLK_q)
+		{
+			// Switch between pillars
 		}
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
@@ -83,6 +93,7 @@ private:
 
 	bool m_HasShiftBeenPressed;
 	bool m_ShouldReflect;
+	bool m_ShouldRotate;
 
 	const int m_PlayerDimensions = 40;
 
@@ -103,6 +114,6 @@ private:
 	void CleanupGameEngine();
 	void ViewPortCollisionDetection();
 
-	Motor Translate(float velocity, float elapsedSec);
+	Motor MakeTranslationMotor(float velocity, float elapsedSec);
 	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);
 };

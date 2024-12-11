@@ -108,6 +108,7 @@ void Game::InitializeGameVariables()
 {
 	m_HasShiftBeenPressed = false; 
 	m_ShouldReflect = false;  
+	m_ShouldRotate = false; 
 
 	m_Player = ThreeBlade{ 200, 300, m_PlayerMaxEnergy, 1 }; 
 	m_PillarPosition = ThreeBlade{ 500, 400, 0, 1 };
@@ -230,7 +231,7 @@ void Game::ViewPortCollisionDetection()
 	}
 }
 
-Motor Game::Translate(float velocity, float elapsedSec)  
+Motor Game::MakeTranslationMotor(float velocity, float elapsedSec)   
 {
 	Motor translator{ Motor::Translation(velocity * elapsedSec, TwoBlade{1, 0, 0, 0, 0, 0}) };
 	return translator;
@@ -243,7 +244,7 @@ ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float 
 
 	// Translate to origin
 	Motor translatorToOrigin{ Motor::Translation(-1 * pillar.VNorm(), TwoBlade{pillar[0], pillar[1], 0, 0, 0, 0}) };
-	player = (translatorToOrigin * player * ~translatorToOrigin).Grade3();
+	player = (translatorToOrigin * player * ~translatorToOrigin).Grade3();	
 
 	// Rotate around origin
 	Motor rotation{ Motor::Rotation(angle, TwoBlade{ 0, 0, 0, 0, 0, 1 }) };
@@ -258,18 +259,20 @@ ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float 
 
 void Game::Update(float elapsedSec)
 {
-	//float rotationAngle{ 45 * elapsedSec };
-	//m_PlayerPosition = RotateAroundPillar(m_PlayerPosition, m_PillarPosition, rotationAngle); 
-
-	if (m_ShouldReflect) 
+	if (m_ShouldRotate)
 	{
-		m_Player = (-m_PillarPosition * -Translate(m_PlayerVelocity, elapsedSec) * m_Player * ~Translate(m_PlayerVelocity, elapsedSec) * ~m_PillarPosition).Grade3();
+		const float rotationAngle{ 45 * elapsedSec }; 
+		m_Player = RotateAroundPillar(m_Player, m_PillarPosition, rotationAngle); 
+	}
+	else if (m_ShouldReflect)  
+	{
+		m_Player = (-m_PillarPosition * -MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * ~m_PillarPosition).Grade3();
 		m_Player[2] *= -1;
 		m_ShouldReflect = false; 
 	}
 	else
 	{
-		m_Player = (Translate(m_PlayerVelocity, elapsedSec) * m_Player * ~Translate(m_PlayerVelocity, elapsedSec)).Grade3();
+		m_Player = (MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec)).Grade3();
 	}
 
 	// Check for collision with the viewport
