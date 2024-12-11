@@ -47,6 +47,11 @@ public:
 		if (e.keysym.sym == SDLK_q)
 		{
 			// Switch between pillars
+			if (!m_Pillars.empty()) 
+			{
+				// Increment and wrap around
+				m_CurrentPillarIndex = (m_CurrentPillarIndex + 1) % m_Pillars.size();
+			}
 		}
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
@@ -96,7 +101,9 @@ private:
 	bool m_ShouldReflect;
 	bool m_ShouldRotate;
 
-	const float m_PlayerDimensions = 40.f;
+	int m_CurrentPillarIndex; 
+
+	const float m_PlayerDimensions = 40.f; 
 	const float m_PillarDimensions = 20.f;
 
 	const float m_PlayerMinEnergy = 0.f;

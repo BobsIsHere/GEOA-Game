@@ -110,6 +110,8 @@ void Game::InitializeGameVariables()
 	m_ShouldReflect = false;  
 	m_ShouldRotate = false; 
 
+	m_CurrentPillarIndex = 0; 
+
 	m_Player = ThreeBlade{ 200, 200, m_PlayerMaxEnergy, 1 }; 
 	m_Pillars.push_back(ThreeBlade{ 400, 300, 0, 1 });
 	m_Pillars.push_back(ThreeBlade{ 900, 500, 0, 1 });
@@ -285,12 +287,12 @@ void Game::Update(float elapsedSec)
 {
 	if (m_ShouldRotate)
 	{
-		const float rotationAngle{ 45 * elapsedSec }; 
-		m_Player = RotateAroundPillar(m_Player, m_Pillars[0], rotationAngle);
+		const float rotationAngle{ 45.f * elapsedSec }; 
+		m_Player = RotateAroundPillar(m_Player, m_Pillars[m_CurrentPillarIndex], rotationAngle);
 	}
 	else if (m_ShouldReflect)  
 	{
-		m_Player = (-m_Pillars[0] * -MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * ~m_Pillars[0]).Grade3(); 
+		m_Player = (-m_Pillars[m_CurrentPillarIndex] * -MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * ~m_Pillars[m_CurrentPillarIndex]).Grade3();
 		m_Player[2] *= -1;
 		m_ShouldReflect = false; 
 	}
