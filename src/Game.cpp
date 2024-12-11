@@ -110,9 +110,13 @@ void Game::InitializeGameVariables()
 	m_ShouldReflect = false;  
 	m_ShouldRotate = false; 
 
-	m_Player = ThreeBlade{ 200, 300, m_PlayerMaxEnergy, 1 }; 
-	m_PillarPosition = ThreeBlade{ 500, 400, 0, 1 };
+	m_Player = ThreeBlade{ 200, 200, m_PlayerMaxEnergy, 1 }; 
+	m_Pillar1 = ThreeBlade{ 400, 300, 0, 1 }; 
+	m_Pillar2 = ThreeBlade{ 900, 500, 0, 1 };
 	m_PlayerVelocity = 400.f;
+
+	m_PlayerColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
+	m_PillarColor = Color4f{ 1.f, 0.f, 1.f, 1.f };
 }
 
 void Game::Run()
@@ -231,6 +235,26 @@ void Game::ViewPortCollisionDetection()
 	}
 }
 
+void Game::UpdatePlayerColor()
+{
+	// Update the player color 
+	Color4f lowEnergyColor = Color4f{ 1.0f, 0.0f, 0.0f, 1.0f }; 
+	Color4f highEnergyColor = Color4f{ 0.0f, 1.0f, 0.0f, 1.0f }; 
+
+	// Calculate the energy ratio (0.0 to 1.0)
+	float energyRatio = (m_Player[2] - m_PlayerMinEnergy) / (m_PlayerMaxEnergy - m_PlayerMinEnergy); 
+
+	// Interpolate the color based on the energy ratio
+	m_PlayerColor.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r); 
+	m_PlayerColor.g = lowEnergyColor.g + energyRatio * (highEnergyColor.g - lowEnergyColor.g); 
+	m_PlayerColor.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b); 
+}
+
+void Game::UpdatePillarColor() 
+{
+
+}
+
 Motor Game::MakeTranslationMotor(float velocity, float elapsedSec)   
 {
 	Motor translator{ Motor::Translation(velocity * elapsedSec, TwoBlade{1, 0, 0, 0, 0, 0}) };
@@ -262,11 +286,11 @@ void Game::Update(float elapsedSec)
 	if (m_ShouldRotate)
 	{
 		const float rotationAngle{ 45 * elapsedSec }; 
-		m_Player = RotateAroundPillar(m_Player, m_PillarPosition, rotationAngle); 
+		m_Player = RotateAroundPillar(m_Player, m_Pillar1, rotationAngle); 
 	}
 	else if (m_ShouldReflect)  
 	{
-		m_Player = (-m_PillarPosition * -MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * ~m_PillarPosition).Grade3();
+		m_Player = (-m_Pillar1 * -MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * ~m_Pillar1).Grade3();
 		m_Player[2] *= -1;
 		m_ShouldReflect = false; 
 	}
@@ -277,6 +301,12 @@ void Game::Update(float elapsedSec)
 
 	// Check for collision with the viewport
 	ViewPortCollisionDetection();  
+
+	// Update the player color
+	UpdatePlayerColor(); 
+
+	//Update the pillar color
+	UpdatePillarColor(); 
 
 	// Print out energy
 	std::cout << "Energy : " << m_Player[2] << std::endl;
@@ -308,28 +338,19 @@ void Game::Update(float elapsedSec)
 			m_Player[2] = std::min(m_Player[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerMaxEnergy);
 		}
 	}
-}
+} 
 
 void Game::Draw() const
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	Color4f lowEnergyColor = Color4f{ 1.0f, 0.0f, 0.0f, 1.0f };
-	Color4f highEnergyColor = Color4f{ 0.0f, 1.0f, 0.0f, 1.0f };
+	utils::SetColor(m_PlayerColor);
+	utils::FillRect(m_Player[0], m_Player[1], m_PlayerDimensions, m_PlayerDimensions);
 
-	// Calculate the energy ratio (0.0 to 1.0)
-	float energyRatio = (m_Player[2] - m_PlayerMinEnergy) / (m_PlayerMaxEnergy - m_PlayerMinEnergy); 
+	utils::SetColor(m_PillarColor);
+	utils::FillRect(m_Pillar1[0], m_Pillar1[1], m_PillarDimensions, m_PillarDimensions);
 
-	// Interpolate the color based on the energy ratio
-	Color4f playerColor{};
-	playerColor.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r); 
-	playerColor.g = lowEnergyColor.g + energyRatio * (highEnergyColor.g - lowEnergyColor.g); 
-	playerColor.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b);
-
-	utils::SetColor(playerColor);
-	utils::FillRect(m_Player[0], m_Player[1],40,40);
-
-	utils::SetColor(Color4f{ 1.f, 0.f, 1.f, 1.f });
-	utils::FillRect(m_PillarPosition[0], m_PillarPosition[1], 20, 20);
+	utils::SetColor(m_PillarColor);  
+	utils::FillRect(m_Pillar2[0], m_Pillar2[1], m_PillarDimensions, m_PillarDimensions);
 }

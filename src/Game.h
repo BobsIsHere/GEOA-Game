@@ -95,7 +95,8 @@ private:
 	bool m_ShouldReflect;
 	bool m_ShouldRotate;
 
-	const int m_PlayerDimensions = 40;
+	const float m_PlayerDimensions = 40.f;
+	const float m_PillarDimensions = 20.f;
 
 	const float m_PlayerMinEnergy = 0.f;
 	const float m_PlayerMaxEnergy = 100.0f;
@@ -106,13 +107,20 @@ private:
 	float m_CooldownTimer;
 
 	ThreeBlade m_Player;
-	ThreeBlade m_PillarPosition;
+	ThreeBlade m_Pillar1; 
+	ThreeBlade m_Pillar2;
+
+	Color4f m_PlayerColor; 
+	Color4f m_PillarColor; 
 	
 	// FUNCTIONS
 	void InitializeGameEngine();
 	void InitializeGameVariables();
 	void CleanupGameEngine();
 	void ViewPortCollisionDetection();
+
+	void UpdatePlayerColor();
+	void UpdatePillarColor(); 
 
 	Motor MakeTranslationMotor(float velocity, float elapsedSec);
 	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);
