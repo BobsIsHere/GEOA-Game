@@ -119,6 +119,7 @@ private:
 
 	Color4f m_PlayerColor; 
 	Color4f m_PillarColor; 
+	Color4f m_SelectedPillarColor; 
 	
 	// FUNCTIONS
 	void InitializeGameEngine();
@@ -127,7 +128,6 @@ private:
 	void ViewPortCollisionDetection();
 
 	void UpdatePlayerColor();
-	void UpdatePillarColor(); 
 
 	Motor MakeTranslationMotor(float velocity, float elapsedSec);
 	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);

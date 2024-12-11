@@ -119,6 +119,7 @@ void Game::InitializeGameVariables()
 
 	m_PlayerColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
 	m_PillarColor = Color4f{ 1.f, 0.f, 1.f, 1.f };
+	m_SelectedPillarColor = Color4f{ 1.f, 1.f, 0.f, 1.f }; 
 }
 
 void Game::Run()
@@ -252,11 +253,6 @@ void Game::UpdatePlayerColor()
 	m_PlayerColor.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b); 
 }
 
-void Game::UpdatePillarColor() 
-{
-
-}
-
 Motor Game::MakeTranslationMotor(float velocity, float elapsedSec)   
 {
 	Motor translator{ Motor::Translation(velocity * elapsedSec, TwoBlade{1, 0, 0, 0, 0, 0}) };
@@ -307,9 +303,6 @@ void Game::Update(float elapsedSec)
 	// Update the player color
 	UpdatePlayerColor(); 
 
-	//Update the pillar color
-	UpdatePillarColor(); 
-
 	// Print out energy
 	std::cout << "Energy : " << m_Player[2] << std::endl;
 
@@ -352,7 +345,15 @@ void Game::Draw() const
 
 	for (size_t idx = 0; idx < m_Pillars.size(); ++idx)
 	{
-		utils::SetColor(m_PillarColor);
+		if (idx == m_CurrentPillarIndex)
+		{
+			utils::SetColor(m_SelectedPillarColor); 
+		}
+		else
+		{
+			utils::SetColor(m_PillarColor);
+		}
+
 		utils::FillRect(m_Pillars[idx][0], m_Pillars[idx][1], m_PillarDimensions, m_PillarDimensions);
 	}
 }
