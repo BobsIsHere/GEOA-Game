@@ -112,10 +112,21 @@ void Game::InitializeGameVariables()
 
 	m_CurrentPillarIndex = 0; 
 
-	m_Player = ThreeBlade{ 200, 200, m_PlayerMaxEnergy, 1 }; 
+	m_LeftPlane = OneBlade{ 0, 1, 0, 0 }; 
+	m_RightPlane = OneBlade{ -m_Viewport.width, 1, 0, 0 };   
+
+	m_TopPlane = OneBlade{ -m_Viewport.height, 0, 1, 0 }; 
+	m_BottomPlane = OneBlade{ 0, 0, 1, 0 };
+
+	m_ViewportPlanes.push_back(m_LeftPlane);
+	m_ViewportPlanes.push_back(m_RightPlane);
+	m_ViewportPlanes.push_back(m_TopPlane);
+	m_ViewportPlanes.push_back(m_BottomPlane);
+
+	m_Player = ThreeBlade{ 200, 200, m_PlayerEnergy, 1 };  
 	m_Pillars.push_back(ThreeBlade{ 400, 300, 0, 1 });
 	m_Pillars.push_back(ThreeBlade{ 900, 500, 0, 1 });
-	m_PlayerVelocity = 400.f;
+	m_PlayerVelocity = TwoBlade{ 1, 0, 0, 0, 0, 400.f }; 
 
 	m_PlayerColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
 	m_PillarColor = Color4f{ 1.f, 0.f, 1.f, 1.f };
@@ -211,30 +222,32 @@ void Game::CleanupGameEngine()
 
 void Game::ViewPortCollisionDetection()
 {
-	// Check for collision of left side of the window
-	if (m_Player[0] < 0)
+	for (OneBlade plane : m_ViewportPlanes) 
 	{
-		m_Player[0] = 0;
-		m_PlayerVelocity *= -1;
-	}
-	// Check for collision of right side of the window
-	else if (m_Player[0] > m_Window.width - m_PlayerDimensions)
-	{
-		m_Player[0] = m_Window.width - m_PlayerDimensions;
-		m_PlayerVelocity *= -1;
-	}
+		const float distance{ ComputeDistance(m_Player, plane) };
 
-	// Check for collision of bottom side of the window
-	if (m_Player[1] < 0)
-	{
-		m_Player[1] = 0;
-		m_PlayerVelocity *= -1;
-	}
-	// Check for collision of top side of the window
-	else if (m_Player[1] > m_Window.height - m_PlayerDimensions)
-	{
-		m_Player[1] = m_Window.height - m_PlayerDimensions;
-		m_PlayerVelocity *= -1;
+		// Check if the current plane is left or right and has reflection logic
+		if (plane == OneBlade{ -m_Viewport.width, 1, 0, 0 })  
+		{
+			if (distance < m_PlayerDimensions)  
+			{
+				m_PlayerVelocity = (OneBlade{ 0, 1, 0, 0 } * m_PlayerVelocity * ~OneBlade{ 0, 1, 0, 0 }).Grade2(); 
+			}
+		}
+		else if (plane == OneBlade{ -m_Viewport.height, 0, 1, 0 })
+		{
+			if (distance < m_PlayerDimensions)
+			{
+				m_PlayerVelocity = (OneBlade{ 0, 0, 1, 0 } * m_PlayerVelocity * ~OneBlade{ 0, 0, 1, 0 }).Grade2();
+			}
+		}
+		else
+		{
+			if (distance < m_PlayerDimensions) 
+			{
+				m_PlayerVelocity = (plane * m_PlayerVelocity * ~plane).Grade2();  
+			}
+		}
 	}
 }
 
@@ -245,7 +258,7 @@ void Game::UpdatePlayerColor()
 	Color4f highEnergyColor = Color4f{ 0.0f, 1.0f, 0.0f, 1.0f }; 
 
 	// Calculate the energy ratio (0.0 to 1.0)
-	float energyRatio = (m_Player[2] - m_PlayerMinEnergy) / (m_PlayerMaxEnergy - m_PlayerMinEnergy); 
+	float energyRatio = (m_Player[2] - m_PlayerMinEnergy) / (m_PlayerEnergy - m_PlayerMinEnergy); 
 
 	// Interpolate the color based on the energy ratio
 	m_PlayerColor.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r); 
@@ -253,10 +266,28 @@ void Game::UpdatePlayerColor()
 	m_PlayerColor.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b); 
 }
 
-Motor Game::MakeTranslationMotor(float velocity, float elapsedSec)   
+float Game::ComputeDistance(OneBlade plane, ThreeBlade player)
 {
-	Motor translator{ Motor::Translation(velocity * elapsedSec, TwoBlade{1, 0, 0, 0, 0, 0}) };
+	return abs(plane & player);    
+}
+
+float Game::ComputeDistance(ThreeBlade player, OneBlade plane)
+{
+	return abs(player & plane); 
+}
+
+Motor Game::MakeTranslationMotor(TwoBlade velocity, float elapsedSec)   
+{
+	float translationAmount{ velocity.Norm() * elapsedSec };
+	Motor translator{ Motor::Translation(translationAmount, velocity) };
+
 	return translator;
+}
+
+TwoBlade Game::RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle)
+{
+	Motor rotation{ Motor::Rotation(angle, TwoBlade{ 0, 0, 0, 0, 0, 1 }) };
+	return (rotation * velocity * ~rotation).Grade2();
 }
 
 ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle)
@@ -285,6 +316,8 @@ void Game::Update(float elapsedSec)
 	{
 		const float rotationAngle{ 45.f * elapsedSec }; 
 		m_Player = RotateAroundPillar(m_Player, m_Pillars[m_CurrentPillarIndex], rotationAngle);
+
+		m_PlayerVelocity = RotateVelocity(m_PlayerVelocity, m_Pillars[m_CurrentPillarIndex], rotationAngle); 
 	}
 	else if (m_ShouldReflect)  
 	{
@@ -298,13 +331,10 @@ void Game::Update(float elapsedSec)
 	}
 
 	// Check for collision with the viewport
-	ViewPortCollisionDetection();  
+	ViewPortCollisionDetection();   
 
 	// Update the player color
 	UpdatePlayerColor(); 
-
-	// Print out energy
-	std::cout << "Energy : " << m_Player[2] << std::endl;
 
 	// Update cooldown timer if active
 	if (m_CooldownTimer > 0.0f)
@@ -328,9 +358,9 @@ void Game::Update(float elapsedSec)
 	}
 	else
 	{
-		if (m_Player[2] < m_PlayerMaxEnergy)
+		if (m_Player[2] < m_PlayerEnergy)
 		{
-			m_Player[2] = std::min(m_Player[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerMaxEnergy);
+			m_Player[2] = std::min(m_Player[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerEnergy);
 		}
 	}
 } 

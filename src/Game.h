@@ -107,12 +107,19 @@ private:
 	const float m_PillarDimensions = 20.f;
 
 	const float m_PlayerMinEnergy = 0.f;
-	const float m_PlayerMaxEnergy = 100.0f;
+	const float m_PlayerEnergy = 100.0f;
 	const float m_EnergyDrainSpeed = 60.f;
 	const float m_CooldownDuration = 1.0f;
 
-	float m_PlayerVelocity;
+	TwoBlade m_PlayerVelocity;
 	float m_CooldownTimer;
+
+	std::vector <OneBlade> m_ViewportPlanes;
+
+	OneBlade m_LeftPlane;
+	OneBlade m_RightPlane;
+	OneBlade m_TopPlane;
+	OneBlade m_BottomPlane;
 
 	std::vector<ThreeBlade> m_Pillars; 
 	ThreeBlade m_Player;
@@ -129,6 +136,21 @@ private:
 
 	void UpdatePlayerColor();
 
-	Motor MakeTranslationMotor(float velocity, float elapsedSec);
+	float ComputeDistance(OneBlade plane, ThreeBlade player);
+	float ComputeDistance(ThreeBlade player, OneBlade plane); 
+
+	Motor MakeTranslationMotor(TwoBlade velocity, float elapsedSec);
+	TwoBlade RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle);
+	TwoBlade ConvertOneBladeToTwoBlade(const OneBlade& oneBladeNormal);
 	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);
 };
+
+/*
+Documentation of Flying Fish :
+	* -> geometric product
+	& -> inner product / join
+	| -> outer product 
+	^ -> meet
+	~ -> inverse
+	! -> poincare dual
+*/
