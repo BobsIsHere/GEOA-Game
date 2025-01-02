@@ -112,6 +112,7 @@ private:
 	const float m_CooldownDuration = 1.0f;
 
 	TwoBlade m_PlayerVelocity;
+	TwoBlade m_PlayerMovementDirection;
 	float m_CooldownTimer;
 
 	std::vector <OneBlade> m_ViewportPlanes;

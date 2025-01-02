@@ -126,7 +126,8 @@ void Game::InitializeGameVariables()
 	m_Player = ThreeBlade{ 200, 200, m_PlayerEnergy, 1 };  
 	m_Pillars.push_back(ThreeBlade{ 400, 300, 0, 1 });
 	m_Pillars.push_back(ThreeBlade{ 900, 500, 0, 1 });
-	m_PlayerVelocity = TwoBlade{ 1, 0, 0, 0, 0, 400.f }; 
+	m_PlayerVelocity = TwoBlade{ 0, 0, 0, 0, 0, 1 }; 
+	m_PlayerMovementDirection = TwoBlade{ 1, 0, 0, 0, 0, 400.f };
 
 	m_PlayerColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
 	m_PillarColor = Color4f{ 1.f, 0.f, 1.f, 1.f };
@@ -231,21 +232,36 @@ void Game::ViewPortCollisionDetection()
 		{
 			if (distance < m_PlayerDimensions)  
 			{
-				m_PlayerVelocity = (OneBlade{ 0, 1, 0, 0 } * m_PlayerVelocity * ~OneBlade{ 0, 1, 0, 0 }).Grade2(); 
+				m_PlayerMovementDirection = (OneBlade{ 0, 1, 0, 0 } * m_PlayerMovementDirection * ~OneBlade{ 0, 1, 0, 0 }).Grade2();
+
+				if (m_ShouldRotate) 
+				{
+					m_PlayerVelocity = -m_PlayerVelocity;
+				}
 			}
 		}
 		else if (plane == OneBlade{ -m_Viewport.height, 0, 1, 0 })
 		{
 			if (distance < m_PlayerDimensions)
 			{
-				m_PlayerVelocity = (OneBlade{ 0, 0, 1, 0 } * m_PlayerVelocity * ~OneBlade{ 0, 0, 1, 0 }).Grade2();
+				m_PlayerMovementDirection = (OneBlade{ 0, 0, 1, 0 } * m_PlayerMovementDirection * ~OneBlade{ 0, 0, 1, 0 }).Grade2();
+
+				if (m_ShouldRotate) 
+				{
+					m_PlayerVelocity = -m_PlayerVelocity;
+				}
 			}
 		}
 		else
 		{
 			if (distance < m_PlayerDimensions) 
 			{
-				m_PlayerVelocity = (plane * m_PlayerVelocity * ~plane).Grade2();  
+				m_PlayerMovementDirection = (plane * m_PlayerMovementDirection * ~plane).Grade2();
+
+				if (m_ShouldRotate) 
+				{
+					m_PlayerVelocity = -m_PlayerVelocity;
+				}
 			}
 		}
 	}
@@ -296,7 +312,7 @@ ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float 
 	pillar = pillar.Normalize();
 
 	// Translate to origin
-	Motor translatorToOrigin{ Motor::Translation(-1 * pillar.VNorm(), TwoBlade{pillar[0], pillar[1], 0, 0, 0, 0}) };
+	Motor translatorToOrigin{ Motor::Translation(-1 * pillar.VNorm(), TwoBlade{ pillar[0], pillar[1], 0, 0, 0, 0 }) };
 	player = (translatorToOrigin * player * ~translatorToOrigin).Grade3();	
 
 	// Rotate around origin
@@ -304,7 +320,7 @@ ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float 
 	player = (rotation * player * ~rotation).Grade3();
 
 	// Translate back
-	Motor translatorBack{ Motor::Translation(pillar.VNorm(), TwoBlade{pillar[0], pillar[1], 0, 0, 0, 0}) };
+	Motor translatorBack{ Motor::Translation(pillar.VNorm(), TwoBlade{ pillar[0], pillar[1], 0, 0, 0, 0 }) };
 	player = (translatorBack * player * ~translatorBack).Grade3();
 
 	return player;
@@ -316,18 +332,18 @@ void Game::Update(float elapsedSec)
 	{
 		const float rotationAngle{ 45.f * elapsedSec }; 
 		m_Player = RotateAroundPillar(m_Player, m_Pillars[m_CurrentPillarIndex], rotationAngle);
-
+ 
 		m_PlayerVelocity = RotateVelocity(m_PlayerVelocity, m_Pillars[m_CurrentPillarIndex], rotationAngle); 
 	}
 	else if (m_ShouldReflect)  
 	{
-		m_Player = (-m_Pillars[m_CurrentPillarIndex] * -MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * ~m_Pillars[m_CurrentPillarIndex]).Grade3();
+		m_Player = (-m_Pillars[m_CurrentPillarIndex] * -MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) * ~m_Pillars[m_CurrentPillarIndex]).Grade3();
 		m_Player[2] *= -1;
 		m_ShouldReflect = false; 
 	}
 	else
 	{
-		m_Player = (MakeTranslationMotor(m_PlayerVelocity, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerVelocity, elapsedSec)).Grade3();
+		m_Player = (MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec)).Grade3();
 	}
 
 	// Check for collision with the viewport
@@ -352,6 +368,7 @@ void Game::Update(float elapsedSec)
 		else
 		{
 			m_HasShiftBeenPressed = false;
+			m_PlayerMovementDirection /= 2; 
 			m_PlayerVelocity /= 2;
 			m_CooldownTimer = m_CooldownDuration; 
 		}
