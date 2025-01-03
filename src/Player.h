@@ -17,8 +17,13 @@ public:
 	void Update(float elapsedSec, ThreeBlade pillarPos);
 	void Draw() const;
 
-	void PlayerKeyDownEvent(const SDL_KeyboardEvent& e, const int pillarAmount); 
+	void PlayerKeyDownEvent(const SDL_KeyboardEvent& e, const size_t pillarAmount); 
 	void PlayerKeyUpEvent(const SDL_KeyboardEvent& e);
+	void PlaneCollisions(OneBlade plane, const float distance);  
+
+	int GetCurrentPillarIndex() const;
+
+	ThreeBlade GetPlayerPosition() const;
 
 private:
 	void UpdatePlayerColor(); 

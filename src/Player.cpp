@@ -6,14 +6,9 @@ Player::Player() :
 	m_ShouldReflect{ false },
 	m_IsRotating{ false }, 
 	m_CurrentPillarIndex{},
-	m_PlayerDimensions{ 40.f },
-	m_PlayerMinEnergy{ 0.f },
-	m_PlayerEnergy{ 100.0f },
-	m_EnergyDrainSpeed{ 60.f },
-	m_CooldownDuration{ 1.0f },
 	m_CooldownTimer{},
-	m_PlayerVelocity{},
-	m_PlayerMovementDirection{},
+	m_PlayerVelocity{ TwoBlade{ 0, 0, 0, 0, 0, 1 } },
+	m_PlayerMovementDirection{ TwoBlade{1, 0, 0, 0, 0, 400} },
 	m_PlayerColor{ 0.f, 1.f, 0.f, 1.f }
 {
 	m_PlayerPosition = ThreeBlade{ 200, 200, m_PlayerEnergy, 1 };
@@ -84,14 +79,11 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 
 void Player::Draw() const
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
 	utils::SetColor(m_PlayerColor);
 	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1], m_PlayerDimensions, m_PlayerDimensions); 
 }
 
-void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e, const int pillarAmount)
+void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e, const size_t pillarAmount)
 {
 	if (e.keysym.sym == SDLK_LSHIFT)
 	{
@@ -133,6 +125,29 @@ void Player::PlayerKeyUpEvent(const SDL_KeyboardEvent& e)
 			m_PlayerVelocity /= 2;
 		}
 	}
+}
+
+void Player::PlaneCollisions(OneBlade plane, const float distance)
+{
+	if (distance < m_PlayerDimensions)
+	{
+		m_PlayerMovementDirection = (plane * m_PlayerMovementDirection * ~plane).Grade2(); 
+
+		if (m_IsRotating)
+		{
+			m_PlayerVelocity = -m_PlayerVelocity;
+		}
+	}
+}
+
+int Player::GetCurrentPillarIndex() const
+{
+	return m_CurrentPillarIndex; 
+}
+
+ThreeBlade Player::GetPlayerPosition() const
+{
+	return m_PlayerPosition; 
 }
 
 void Player::UpdatePlayerColor()

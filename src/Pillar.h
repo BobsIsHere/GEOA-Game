@@ -4,7 +4,7 @@
 class Pillar
 {
 public:
-	explicit Pillar();
+	explicit Pillar(ThreeBlade pillarPos);
 	~Pillar(); 
 
 	Pillar(const Pillar& other) = delete;
@@ -13,6 +13,8 @@ public:
 	Pillar& operator=(Pillar&& other) = delete;
 
 	void Draw(Color4f pillarColor) const;
+
+	ThreeBlade GetPillarPosition() const;
 	
 private:
 	const float m_PillarDimensions = 20.f; 

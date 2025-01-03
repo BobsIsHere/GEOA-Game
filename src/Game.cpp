@@ -8,13 +8,14 @@
 #include "utils.h"
 #include "structs.h"
 
-Game::Game(const Window& window)
-	: m_Window{ window }
-	, m_Viewport{ 0,0,window.width,window.height }
-	, m_pWindow{ nullptr }
-	, m_pContext{ nullptr }
-	, m_Initialized{ false }
-	, m_MaxElapsedSeconds{ 0.1f }
+Game::Game(const Window& window) :
+	m_Window{ window },
+	m_Viewport{ 0, 0, window.width, window.height },
+	m_pWindow{ nullptr },
+	m_pContext{ nullptr },
+	m_Initialized{ false },
+	m_MaxElapsedSeconds{ 0.1f },
+	m_Player{}
 {
 	InitializeGameEngine();
 	InitializeGameVariables();
@@ -106,12 +107,6 @@ void Game::InitializeGameEngine()
 
 void Game::InitializeGameVariables()
 {
-	m_HasShiftBeenPressed = false; 
-	m_ShouldReflect = false;  
-	m_IsRotating = false; 
-
-	m_CurrentPillarIndex = 0; 
-
 	m_LeftPlane = OneBlade{ 0, 1, 0, 0 }; 
 	m_RightPlane = OneBlade{ -m_Viewport.width, 1, 0, 0 };   
 
@@ -123,11 +118,8 @@ void Game::InitializeGameVariables()
 	m_ViewportPlanes.push_back(m_TopPlane);
 	m_ViewportPlanes.push_back(m_BottomPlane);
 
-	m_Player = ThreeBlade{ 200, 200, m_PlayerEnergy, 1 };  
-	m_Pillars.push_back(ThreeBlade{ 400, 300, 0, 1 });
-	m_Pillars.push_back(ThreeBlade{ 900, 500, 0, 1 });
-	m_PlayerVelocity = TwoBlade{ 0, 0, 0, 0, 0, 1 }; 
-	m_PlayerMovementDirection = TwoBlade{ 1, 0, 0, 0, 0, 400.f };
+	m_Pillars.push_back(new Pillar{ ThreeBlade{ 400, 300, 0, 1 } });
+	m_Pillars.push_back(new Pillar{ ThreeBlade{ 900, 500, 0, 1 } });
 
 	m_PlayerColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
 	m_PillarColor = Color4f{ 1.f, 0.f, 1.f, 1.f };
@@ -211,6 +203,12 @@ void Game::Run()
 
 void Game::CleanupGameEngine()
 {
+	for (const Pillar* pillar : m_Pillars)
+	{
+		delete pillar;
+		pillar = nullptr; 
+	}
+
 	SDL_GL_DeleteContext(m_pContext);
 
 	SDL_DestroyWindow(m_pWindow);
@@ -224,166 +222,35 @@ void Game::CleanupGameEngine()
 // give it ThreeBlade parameter and boolean parameter
 // Threeblade -> player or enemy
 // boolean -> should it rotate or not
-void Game::ViewPortCollisionDetection(ThreeBlade entityPos, bool isRotating)
+void Game::ViewPortCollisionDetection(const Player& entityPos, bool isRotating)
 {
 	for (OneBlade plane : m_ViewportPlanes) 
 	{
-		const float distance{ ComputeDistance(m_Player, plane) };
+		const float distance{ utils::ComputeDistance(entityPos.GetPlayerPosition(), plane)};
 
 		// Check if the current plane is left or right and has reflection logic
-		if (plane == OneBlade{ -m_Viewport.width, 1, 0, 0 })  
+		if (plane == m_RightPlane)   
 		{
-			if (distance < m_PlayerDimensions)  
-			{
-				m_PlayerMovementDirection = (OneBlade{ 0, 1, 0, 0 } * m_PlayerMovementDirection * ~OneBlade{ 0, 1, 0, 0 }).Grade2();
-
-				if (m_IsRotating) 
-				{
-					m_PlayerVelocity = -m_PlayerVelocity;
-				}
-			}
+			m_Player.PlaneCollisions(m_LeftPlane, distance); 
 		}
-		else if (plane == OneBlade{ -m_Viewport.height, 0, 1, 0 })
+		else if (plane == m_TopPlane)
 		{
-			if (distance < m_PlayerDimensions)
-			{
-				m_PlayerMovementDirection = (OneBlade{ 0, 0, 1, 0 } * m_PlayerMovementDirection * ~OneBlade{ 0, 0, 1, 0 }).Grade2();
-
-				if (m_IsRotating) 
-				{
-					m_PlayerVelocity = -m_PlayerVelocity;
-				}
-			}
+			m_Player.PlaneCollisions(m_BottomPlane, distance); 
 		}
 		else
 		{
-			if (distance < m_PlayerDimensions) 
-			{
-				m_PlayerMovementDirection = (plane * m_PlayerMovementDirection * ~plane).Grade2();
-
-				if (m_IsRotating) 
-				{
-					m_PlayerVelocity = -m_PlayerVelocity;
-				}
-			}
+			m_Player.PlaneCollisions(plane, distance); 
 		}
 	}
-}
-
-void Game::UpdatePlayerColor()
-{
-	// Update the player color 
-	Color4f lowEnergyColor = Color4f{ 1.0f, 0.0f, 0.0f, 1.0f }; 
-	Color4f highEnergyColor = Color4f{ 0.0f, 1.0f, 0.0f, 1.0f }; 
-
-	// Calculate the energy ratio (0.0 to 1.0)
-	float energyRatio = (m_Player[2] - m_PlayerMinEnergy) / (m_PlayerEnergy - m_PlayerMinEnergy); 
-
-	// Interpolate the color based on the energy ratio
-	m_PlayerColor.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r); 
-	m_PlayerColor.g = lowEnergyColor.g + energyRatio * (highEnergyColor.g - lowEnergyColor.g); 
-	m_PlayerColor.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b); 
-}
-
-float Game::ComputeDistance(OneBlade plane, ThreeBlade player)
-{
-	return abs(plane & player);    
-}
-
-float Game::ComputeDistance(ThreeBlade player, OneBlade plane)
-{
-	return abs(player & plane); 
-}
-
-Motor Game::MakeTranslationMotor(TwoBlade velocity, float elapsedSec)   
-{
-	float translationAmount{ velocity.Norm() * elapsedSec };
-	Motor translator{ Motor::Translation(translationAmount, velocity) };
-
-	return translator;
-}
-
-TwoBlade Game::RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle)
-{
-	Motor rotation{ Motor::Rotation(angle, TwoBlade{ 0, 0, 0, 0, 0, 1 }) };
-	return (rotation * velocity * ~rotation).Grade2();
-}
-
-ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle)
-{
-	// Normalize the pillar position
-	pillar = pillar.Normalize();
-
-	// Translate to origin
-	Motor translatorToOrigin{ Motor::Translation(-1 * pillar.VNorm(), TwoBlade{ pillar[0], pillar[1], 0, 0, 0, 0 }) };
-	player = (translatorToOrigin * player * ~translatorToOrigin).Grade3();	
-
-	// Rotate around origin
-	Motor rotation{ Motor::Rotation(angle, m_PlayerVelocity) }; 
-	player = (rotation * player * ~rotation).Grade3();
-
-	// Translate back
-	Motor translatorBack{ Motor::Translation(pillar.VNorm(), TwoBlade{ pillar[0], pillar[1], 0, 0, 0, 0 }) };
-	player = (translatorBack * player * ~translatorBack).Grade3();
-
-	return player;
 }
 
 void Game::Update(float elapsedSec)
 {
-	if (m_IsRotating)
-	{
-		const float rotationAngle{ 45.f * elapsedSec }; 
-		m_Player = RotateAroundPillar(m_Player, m_Pillars[m_CurrentPillarIndex], rotationAngle);
-		
-		m_PlayerMovementDirection = RotateVelocity(m_PlayerMovementDirection, m_Pillars[m_CurrentPillarIndex], rotationAngle);
-		m_PlayerVelocity = RotateVelocity(m_PlayerVelocity, m_Pillars[m_CurrentPillarIndex], rotationAngle); 
-	}
-	else if (m_ShouldReflect)  
-	{
-		m_Player = (-m_Pillars[m_CurrentPillarIndex] * -MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) * ~m_Pillars[m_CurrentPillarIndex]).Grade3();
-		m_Player[2] *= -1;
-		m_ShouldReflect = false; 
-	}
-	else
-	{
-		m_Player = (MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) * m_Player * ~MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec)).Grade3();
-	}
-
 	// Check for collision with the viewport
 	ViewPortCollisionDetection(m_Player, true);   
 
-	// Update the player color
-	UpdatePlayerColor(); 
-
-	// Update cooldown timer if active
-	if (m_CooldownTimer > 0.0f)
-	{
-		m_CooldownTimer -= elapsedSec;
-	}
-
-	// Increase or decrease Player's energy
-	if (m_HasShiftBeenPressed)
-	{
-		if (m_Player[2] > m_PlayerMinEnergy)
-		{
-			m_Player[2] = std::max(m_PlayerMinEnergy, m_Player[2] - m_EnergyDrainSpeed * elapsedSec);
-		}
-		else
-		{
-			m_HasShiftBeenPressed = false;
-			m_PlayerMovementDirection /= 2; 
-			m_PlayerVelocity /= 2;
-			m_CooldownTimer = m_CooldownDuration; 
-		}
-	}
-	else
-	{
-		if (m_Player[2] < m_PlayerEnergy)
-		{
-			m_Player[2] = std::min(m_Player[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerEnergy);
-		}
-	}
+	// Update the player
+	m_Player.Update(elapsedSec, m_Pillars[m_Player.GetCurrentPillarIndex()]->GetPillarPosition()); 
 } 
 
 void Game::Draw() const
@@ -391,20 +258,17 @@ void Game::Draw() const
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	utils::SetColor(m_PlayerColor);
-	utils::FillRect(m_Player[0], m_Player[1], m_PlayerDimensions, m_PlayerDimensions);
+	m_Player.Draw();
 
 	for (size_t idx = 0; idx < m_Pillars.size(); ++idx)
 	{
-		if (idx == m_CurrentPillarIndex)
+		if (idx == m_Player.GetCurrentPillarIndex()) 
 		{
-			utils::SetColor(m_SelectedPillarColor); 
+			m_Pillars[idx]->Draw(m_SelectedPillarColor); 
 		}
 		else
 		{
-			utils::SetColor(m_PillarColor);
+			m_Pillars[idx]->Draw(m_PillarColor);
 		}
-
-		utils::FillRect(m_Pillars[idx][0], m_Pillars[idx][1], m_PillarDimensions, m_PillarDimensions);
 	}
 }
