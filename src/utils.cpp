@@ -276,3 +276,49 @@ void utils::FillPolygon( const Point2f *pVertices, size_t nrVertices )
 	glEnd( );
 }
 #pragma endregion OpenGLDrawFunctionality
+
+#pragma region FlyingFishHelpers
+float utils::ComputeDistance(OneBlade plane, ThreeBlade player)
+{
+	return abs(plane & player);
+}
+
+float utils::ComputeDistance(ThreeBlade player, OneBlade plane)
+{
+	return abs(player & plane);
+}
+
+Motor utils::MakeTranslationMotor(TwoBlade velocity, float elapsedSec)
+{
+	float translationAmount{ velocity.Norm() * elapsedSec };
+	Motor translator{ Motor::Translation(translationAmount, velocity) };
+
+	return translator;
+}
+
+TwoBlade utils::RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle)
+{
+	Motor rotation{ Motor::Rotation(angle, TwoBlade{ 0, 0, 0, 0, 0, 1 }) };
+	return (rotation * velocity * ~rotation).Grade2();
+}
+
+ThreeBlade utils::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, TwoBlade velocity, float angle) 
+{
+	// Normalize the pillar position
+	pillar = pillar.Normalize();
+
+	// Translate to origin
+	Motor translatorToOrigin{ Motor::Translation(-1 * pillar.VNorm(), TwoBlade{ pillar[0], pillar[1], 0, 0, 0, 0 }) };
+	player = (translatorToOrigin * player * ~translatorToOrigin).Grade3();
+
+	// Rotate around origin
+	Motor rotation{ Motor::Rotation(angle, velocity) };
+	player = (rotation * player * ~rotation).Grade3();
+
+	// Translate back
+	Motor translatorBack{ Motor::Translation(pillar.VNorm(), TwoBlade{ pillar[0], pillar[1], 0, 0, 0, 0 }) };
+	player = (translatorBack * player * ~translatorBack).Grade3();
+
+	return player;
+}
+#pragma endregion FlyingFishHelpers

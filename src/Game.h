@@ -9,17 +9,15 @@ class Game
 {
 public:
 	explicit Game(const Window& window);
+	~Game();
+
 	Game(const Game& other) = delete;
 	Game& operator=(const Game& other) = delete;
 	Game(Game&& other) = delete;
 	Game& operator=(Game&& other) = delete;
 
-	~Game();
-
 	void Run();
-
 	void Update(float elapsedSec);
-
 	void Draw() const;
 
 	// Event handling
@@ -41,7 +39,7 @@ public:
 
 		if (e.keysym.sym == SDLK_r)
 		{
-			m_ShouldRotate = !m_ShouldRotate; 
+			m_IsRotating = !m_IsRotating; 
 		}
 
 		if (e.keysym.sym == SDLK_q)
@@ -67,15 +65,12 @@ public:
 	}
 	void ProcessMouseMotionEvent(const SDL_MouseMotionEvent& e)
 	{
-		
 	}
 	void ProcessMouseDownEvent(const SDL_MouseButtonEvent& e)
 	{
-		
 	}
 	void ProcessMouseUpEvent(const SDL_MouseButtonEvent& e)
 	{
-		
 	}
 
 	const Rectf& GetViewPort() const
@@ -84,6 +79,21 @@ public:
 	}
 
 private:
+	// FUNCTIONS
+	void InitializeGameEngine();
+	void InitializeGameVariables();
+	void CleanupGameEngine();
+	void ViewPortCollisionDetection(ThreeBlade entityPos, bool isRotating);
+
+	void UpdatePlayerColor();
+
+	float ComputeDistance(OneBlade plane, ThreeBlade player);
+	float ComputeDistance(ThreeBlade player, OneBlade plane);
+
+	Motor MakeTranslationMotor(TwoBlade velocity, float elapsedSec);
+	TwoBlade RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle);
+	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);
+
 	// DATA MEMBERS
 	// The window properties
 	const Window m_Window;
@@ -99,7 +109,7 @@ private:
 
 	bool m_HasShiftBeenPressed;
 	bool m_ShouldReflect;
-	bool m_ShouldRotate;
+	bool m_IsRotating;
 
 	int m_CurrentPillarIndex; 
 
@@ -128,21 +138,6 @@ private:
 	Color4f m_PlayerColor; 
 	Color4f m_PillarColor; 
 	Color4f m_SelectedPillarColor; 
-	
-	// FUNCTIONS
-	void InitializeGameEngine();
-	void InitializeGameVariables();
-	void CleanupGameEngine();
-	void ViewPortCollisionDetection();
-
-	void UpdatePlayerColor();
-
-	float ComputeDistance(OneBlade plane, ThreeBlade player);
-	float ComputeDistance(ThreeBlade player, OneBlade plane); 
-
-	Motor MakeTranslationMotor(TwoBlade velocity, float elapsedSec);
-	TwoBlade RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle);
-	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);
 };
 
 /*

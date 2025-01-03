@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "FlyFish.h"
 #include "structs.h"
 
 namespace utils
@@ -47,5 +48,17 @@ namespace utils
 	void DrawPolygon( const Point2f* pVertices, size_t nrVertices, bool closed = true, float lineWidth = 1.0f );
 	void FillPolygon( const std::vector<Point2f>& vertices);
 	void FillPolygon( const Point2f* pVertices, size_t nrVertices);
+
 #pragma endregion OpenGLDrawFunctionality
+
+#pragma region FlyingFishHelpers
+
+	float ComputeDistance(OneBlade plane, ThreeBlade player);
+	float ComputeDistance(ThreeBlade player, OneBlade plane);
+
+	Motor MakeTranslationMotor(TwoBlade velocity, float elapsedSec);
+	TwoBlade RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle);
+	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, TwoBlade velocity, float angle); 
+
+#pragma endregion FlyingFishHelpers
 }

@@ -108,7 +108,7 @@ void Game::InitializeGameVariables()
 {
 	m_HasShiftBeenPressed = false; 
 	m_ShouldReflect = false;  
-	m_ShouldRotate = false; 
+	m_IsRotating = false; 
 
 	m_CurrentPillarIndex = 0; 
 
@@ -221,7 +221,10 @@ void Game::CleanupGameEngine()
 	SDL_Quit();
 }
 
-void Game::ViewPortCollisionDetection()
+// give it ThreeBlade parameter and boolean parameter
+// Threeblade -> player or enemy
+// boolean -> should it rotate or not
+void Game::ViewPortCollisionDetection(ThreeBlade entityPos, bool isRotating)
 {
 	for (OneBlade plane : m_ViewportPlanes) 
 	{
@@ -234,7 +237,7 @@ void Game::ViewPortCollisionDetection()
 			{
 				m_PlayerMovementDirection = (OneBlade{ 0, 1, 0, 0 } * m_PlayerMovementDirection * ~OneBlade{ 0, 1, 0, 0 }).Grade2();
 
-				if (m_ShouldRotate) 
+				if (m_IsRotating) 
 				{
 					m_PlayerVelocity = -m_PlayerVelocity;
 				}
@@ -246,7 +249,7 @@ void Game::ViewPortCollisionDetection()
 			{
 				m_PlayerMovementDirection = (OneBlade{ 0, 0, 1, 0 } * m_PlayerMovementDirection * ~OneBlade{ 0, 0, 1, 0 }).Grade2();
 
-				if (m_ShouldRotate) 
+				if (m_IsRotating) 
 				{
 					m_PlayerVelocity = -m_PlayerVelocity;
 				}
@@ -258,7 +261,7 @@ void Game::ViewPortCollisionDetection()
 			{
 				m_PlayerMovementDirection = (plane * m_PlayerMovementDirection * ~plane).Grade2();
 
-				if (m_ShouldRotate) 
+				if (m_IsRotating) 
 				{
 					m_PlayerVelocity = -m_PlayerVelocity;
 				}
@@ -328,7 +331,7 @@ ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float 
 
 void Game::Update(float elapsedSec)
 {
-	if (m_ShouldRotate)
+	if (m_IsRotating)
 	{
 		const float rotationAngle{ 45.f * elapsedSec }; 
 		m_Player = RotateAroundPillar(m_Player, m_Pillars[m_CurrentPillarIndex], rotationAngle);
@@ -348,7 +351,7 @@ void Game::Update(float elapsedSec)
 	}
 
 	// Check for collision with the viewport
-	ViewPortCollisionDetection();   
+	ViewPortCollisionDetection(m_Player, true);   
 
 	// Update the player color
 	UpdatePlayerColor(); 
