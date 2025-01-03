@@ -332,7 +332,8 @@ void Game::Update(float elapsedSec)
 	{
 		const float rotationAngle{ 45.f * elapsedSec }; 
 		m_Player = RotateAroundPillar(m_Player, m_Pillars[m_CurrentPillarIndex], rotationAngle);
- 
+		
+		m_PlayerMovementDirection = RotateVelocity(m_PlayerMovementDirection, m_Pillars[m_CurrentPillarIndex], rotationAngle);
 		m_PlayerVelocity = RotateVelocity(m_PlayerVelocity, m_Pillars[m_CurrentPillarIndex], rotationAngle); 
 	}
 	else if (m_ShouldReflect)  

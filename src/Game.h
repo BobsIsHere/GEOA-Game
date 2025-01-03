@@ -142,7 +142,6 @@ private:
 
 	Motor MakeTranslationMotor(TwoBlade velocity, float elapsedSec);
 	TwoBlade RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle);
-	TwoBlade ConvertOneBladeToTwoBlade(const OneBlade& oneBladeNormal);
 	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float angle);
 };
 
