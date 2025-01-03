@@ -316,7 +316,7 @@ ThreeBlade Game::RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, float 
 	player = (translatorToOrigin * player * ~translatorToOrigin).Grade3();	
 
 	// Rotate around origin
-	Motor rotation{ Motor::Rotation(angle, TwoBlade{ 0, 0, 0, 0, 0, 1 }) };
+	Motor rotation{ Motor::Rotation(angle, m_PlayerVelocity) }; 
 	player = (rotation * player * ~rotation).Grade3();
 
 	// Translate back
