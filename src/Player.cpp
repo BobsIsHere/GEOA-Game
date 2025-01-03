@@ -107,7 +107,7 @@ void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e, const size_t pillarA
 	if (e.keysym.sym == SDLK_q)
 	{
 		// Switch between pillars
-		if (pillarAmount <= 0)
+		if (pillarAmount >= 0)
 		{
 			// Increment and wrap around
 			m_CurrentPillarIndex = (m_CurrentPillarIndex + 1) % pillarAmount; 
