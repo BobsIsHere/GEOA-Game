@@ -53,8 +53,10 @@ namespace utils
 
 #pragma region FlyingFishHelpers
 
-	float ComputeDistance(OneBlade plane, ThreeBlade player);
-	float ComputeDistance(ThreeBlade player, OneBlade plane);
+	float ComputeDistance(OneBlade plane, ThreeBlade entity);
+	float ComputeDistance(ThreeBlade entity, OneBlade plane);
+	TwoBlade ComputeDistance(ThreeBlade player, ThreeBlade entity);  
+	TwoBlade Abs(TwoBlade blade); 
 
 	Motor MakeTranslationMotor(TwoBlade velocity, float elapsedSec);
 	TwoBlade RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle);

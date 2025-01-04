@@ -278,14 +278,29 @@ void utils::FillPolygon( const Point2f *pVertices, size_t nrVertices )
 #pragma endregion OpenGLDrawFunctionality
 
 #pragma region FlyingFishHelpers
-float utils::ComputeDistance(OneBlade plane, ThreeBlade player)
+float utils::ComputeDistance(OneBlade plane, ThreeBlade entity)
 {
-	return abs(plane & player);
+	return abs(plane & entity);
 }
 
-float utils::ComputeDistance(ThreeBlade player, OneBlade plane)
+float utils::ComputeDistance(ThreeBlade entity, OneBlade plane)
 {
-	return abs(player & plane);
+	return abs(entity & plane);
+}
+
+TwoBlade utils::ComputeDistance(ThreeBlade player, ThreeBlade entity) 
+{
+	return player & entity; 
+}
+
+TwoBlade utils::Abs(TwoBlade blade)
+{
+	for (size_t idx{}; idx < 6; ++idx)
+	{
+		blade[idx] = abs(blade[idx]);
+	}
+
+	return blade;
 }
 
 Motor utils::MakeTranslationMotor(TwoBlade velocity, float elapsedSec)

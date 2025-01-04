@@ -1,12 +1,12 @@
-#include "FlyFish.h"
-#include "SDL.h"
 #include "SDL_opengl.h"
+#include "SDL.h"
+#include "FlyFish.h"
 #include "structs.h"
 
 class Player
 {
 public:
-	explicit Player();
+	explicit Player(float xPos, float yPos);
 	~Player();
 
 	Player(const Player& other) = delete;

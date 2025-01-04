@@ -6,6 +6,7 @@
 #include "SDL_opengl.h"
 #include "Player.h"
 #include "Pillar.h"
+#include "Pickup.h"
 
 class Game
 {
@@ -78,6 +79,7 @@ private:
 	Color4f m_SelectedPillarColor; 
 
 	Player m_Player; 
+	Pickup m_Pickup;
 	std::vector<Pillar*> m_Pillars;  
 };
 

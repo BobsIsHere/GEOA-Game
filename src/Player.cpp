@@ -1,7 +1,7 @@
 #include "Player.h"
 #include "utils.h"
 
-Player::Player() :
+Player::Player(float xPos, float yPos) :
 	m_HasShiftBeenPressed{ false },
 	m_ShouldReflect{ false },
 	m_IsRotating{ false }, 
@@ -11,7 +11,7 @@ Player::Player() :
 	m_PlayerMovementDirection{ TwoBlade{1, 0, 0, 0, 0, 400} },
 	m_PlayerColor{ 0.f, 1.f, 0.f, 1.f }
 {
-	m_PlayerPosition = ThreeBlade{ 200, 200, m_PlayerEnergy, 1 };
+	m_PlayerPosition = ThreeBlade{ xPos, yPos, m_PlayerEnergy, 1 }; 
 }
 
 Player::~Player()

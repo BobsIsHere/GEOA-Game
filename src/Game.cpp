@@ -15,7 +15,8 @@ Game::Game(const Window& window) :
 	m_pContext{ nullptr },
 	m_Initialized{ false },
 	m_MaxElapsedSeconds{ 0.1f },
-	m_Player{}
+	m_Player{ 200.f, 200.f },
+	m_Pickup{ ThreeBlade{ 600.f, 200.f, 0.f, 1.f }, 10.f }
 {
 	InitializeGameEngine();
 	InitializeGameVariables();
@@ -251,6 +252,8 @@ void Game::Update(float elapsedSec)
 
 	// Update the player
 	m_Player.Update(elapsedSec, m_Pillars[m_Player.GetCurrentPillarIndex()]->GetPillarPosition()); 
+
+	m_Pickup.Update(elapsedSec, m_Player.GetPlayerPosition());
 } 
 
 void Game::Draw() const
@@ -259,6 +262,7 @@ void Game::Draw() const
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	m_Player.Draw();
+	m_Pickup.Draw();
 
 	for (size_t idx = 0; idx < m_Pillars.size(); ++idx)
 	{

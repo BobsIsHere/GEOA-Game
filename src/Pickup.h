@@ -1,8 +1,9 @@
+#include "FlyFish.h"
 
 class Pickup
 {
 public:
-	Pickup();
+	explicit Pickup(const ThreeBlade& position, float energyValue); 
 	~Pickup();
 
 	Pickup(const Pickup& other) = delete;
@@ -10,9 +11,12 @@ public:
 	Pickup(Pickup&& other) = delete;
 	Pickup& operator=(Pickup&& other) = delete;
 
-	void Update(float elapsedSec);
+	void Update(float elapsedSec, const ThreeBlade& playerPos);
 	void Draw() const;
 
+	TwoBlade CheckCollision(const ThreeBlade& playerPos);
+
 private:
-	
+	ThreeBlade m_PickupPosition;
+	float m_EnergyValue;
 };
