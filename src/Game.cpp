@@ -15,7 +15,7 @@ Game::Game(const Window& window) :
 	m_pContext{ nullptr },
 	m_Initialized{ false },
 	m_MaxElapsedSeconds{ 0.1f },
-	m_Player{ 200.f, 200.f },
+	m_Player{ 200.f, 200.f, Point2f{ window.width, window.height } },
 	m_Pickup{ ThreeBlade{ 600.f, 200.f, 0.f, 1.f }, 10.f }
 {
 	InitializeGameEngine();
@@ -253,6 +253,7 @@ void Game::Update(float elapsedSec)
 	// Update the player
 	m_Player.Update(elapsedSec, m_Pillars[m_Player.GetCurrentPillarIndex()]->GetPillarPosition()); 
 
+	// Update the pickup
 	m_Pickup.Update(elapsedSec, m_Player.GetPlayerPosition());
 } 
 

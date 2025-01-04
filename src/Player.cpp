@@ -1,7 +1,8 @@
+#include <algorithm>
 #include "Player.h"
 #include "utils.h"
 
-Player::Player(float xPos, float yPos) :
+Player::Player(float xPos, float yPos, Point2f window) : 
 	m_HasShiftBeenPressed{ false },
 	m_ShouldReflect{ false },
 	m_IsRotating{ false }, 
@@ -9,7 +10,8 @@ Player::Player(float xPos, float yPos) :
 	m_CooldownTimer{},
 	m_PlayerVelocity{ TwoBlade{ 0, 0, 0, 0, 0, 1 } },
 	m_PlayerMovementDirection{ TwoBlade{1, 0, 0, 0, 0, 400} },
-	m_PlayerColor{ 0.f, 1.f, 0.f, 1.f }
+	m_PlayerColor{ 0.f, 1.f, 0.f, 1.f },
+	m_WindowDimentions{ window } 
 {
 	m_PlayerPosition = ThreeBlade{ xPos, yPos, m_PlayerEnergy, 1 }; 
 }
@@ -31,11 +33,12 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	else if (m_ShouldReflect)
 	{
 		m_PlayerPosition = (-pillarPos * -utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec)
-							* m_PlayerPosition  
+							* m_PlayerPosition
 							* ~utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) * ~pillarPos).Grade3();
+		ClampToViewport(); 
 
-		m_PlayerPosition[2] *= -1;
-		m_ShouldReflect = false;
+		m_PlayerPosition[2] *= -1;  
+		m_ShouldReflect = false;  
 	}
 	else
 	{
@@ -163,4 +166,11 @@ void Player::UpdatePlayerColor()
 	m_PlayerColor.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r);
 	m_PlayerColor.g = lowEnergyColor.g + energyRatio * (highEnergyColor.g - lowEnergyColor.g);
 	m_PlayerColor.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b);
+}
+
+void Player::ClampToViewport()
+{
+	// Clamp the player position to the viewport
+	m_PlayerPosition[0] = std::clamp(m_PlayerPosition[0], m_PlayerDimensions, static_cast<float>(m_WindowDimentions.x - m_PlayerDimensions));
+	m_PlayerPosition[1] = std::clamp(m_PlayerPosition[1], m_PlayerDimensions, static_cast<float>(m_WindowDimentions.y - m_PlayerDimensions));
 }

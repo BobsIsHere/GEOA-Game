@@ -6,7 +6,7 @@
 class Player
 {
 public:
-	explicit Player(float xPos, float yPos);
+	explicit Player(float xPos, float yPos, Point2f window);
 	~Player();
 
 	Player(const Player& other) = delete;
@@ -27,6 +27,7 @@ public:
 
 private:
 	void UpdatePlayerColor(); 
+	void ClampToViewport(); 
 
 	bool m_HasShiftBeenPressed;
 	bool m_ShouldReflect;
@@ -41,6 +42,8 @@ private:
 	const float m_CooldownDuration = 1.0f;
 
 	float m_CooldownTimer;
+
+	Point2f m_WindowDimentions;
 
 	TwoBlade m_PlayerVelocity;
 	TwoBlade m_PlayerMovementDirection;
