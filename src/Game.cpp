@@ -16,7 +16,7 @@ Game::Game(const Window& window) :
 	m_Initialized{ false },
 	m_MaxElapsedSeconds{ 0.1f },
 	m_Player{ 200.f, 200.f, Point2f{ window.width, window.height } },
-	m_Pickup{ ThreeBlade{ 600.f, 200.f, 0.f, 1.f }, 10.f }
+	m_Pickup{ Point2f{ window.width, window.height } } 
 {
 	InitializeGameEngine();
 	InitializeGameVariables();

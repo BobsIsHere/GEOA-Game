@@ -3,7 +3,7 @@
 class Pickup
 {
 public:
-	explicit Pickup(const ThreeBlade& position, float energyValue); 
+	explicit Pickup(Point2f window);
 	~Pickup();
 
 	Pickup(const Pickup& other) = delete;
@@ -18,5 +18,7 @@ public:
 
 private:
 	ThreeBlade m_PickupPosition;
-	float m_EnergyValue;
+	Point2f m_WindowDimentions;
+
+	const float m_PickupDimensions = 10.f; 
 };
