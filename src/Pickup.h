@@ -1,5 +1,7 @@
 #include "FlyFish.h"
 
+class Player; 
+
 class Pickup
 {
 public:
@@ -11,7 +13,7 @@ public:
 	Pickup(Pickup&& other) = delete;
 	Pickup& operator=(Pickup&& other) = delete;
 
-	void Update(float elapsedSec, const ThreeBlade& playerPos);
+	void Update(float elapsedSec, Player& player);
 	void Draw() const;
 
 	TwoBlade CheckCollision(const ThreeBlade& playerPos);

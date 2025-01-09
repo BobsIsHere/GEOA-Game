@@ -8,8 +8,8 @@ Player::Player(float xPos, float yPos, Point2f window) :
 	m_IsRotating{ false }, 
 	m_CurrentPillarIndex{},
 	m_CooldownTimer{},
-	m_PlayerVelocity{ TwoBlade{ 0, 0, 0, 0, 0, 1 } },
-	m_PlayerMovementDirection{ TwoBlade{1, 0, 0, 0, 0, 400} },
+	m_PlayerVelocity{ m_BaseVelocity }, 
+	m_PlayerMovementDirection{ m_BaseMovementDirection }, 
 	m_PlayerColor{ 0.f, 1.f, 0.f, 1.f },
 	m_WindowDimentions{ window } 
 {
@@ -25,16 +25,15 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	if (m_IsRotating)
 	{
 		const float rotationAngle{ 45.f * elapsedSec };
-		m_PlayerPosition = utils::RotateAroundPillar(m_PlayerPosition, pillarPos, m_PlayerVelocity, rotationAngle);
+		m_PlayerPosition = utils::RotateAroundPillar(m_PlayerPosition, pillarPos, m_PlayerVelocity, rotationAngle); 
 
-		m_PlayerMovementDirection = utils::RotateVelocity(m_PlayerMovementDirection, pillarPos, rotationAngle);
-		m_PlayerVelocity = utils::RotateVelocity(m_PlayerVelocity, pillarPos, rotationAngle); 
+		m_PlayerMovementDirection = utils::RotateVelocity(m_PlayerMovementDirection, rotationAngle); 
+		m_PlayerVelocity = utils::RotateVelocity(m_PlayerVelocity, rotationAngle); 
 	}
 	else if (m_ShouldReflect)
 	{
-		m_PlayerPosition = (-pillarPos * -utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec)
-							* m_PlayerPosition
-							* ~utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) * ~pillarPos).Grade3();
+		Motor transformationMotor{ utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) };
+		m_PlayerPosition = (-pillarPos * -transformationMotor * m_PlayerPosition * ~transformationMotor * ~pillarPos).Grade3(); 
 		ClampToViewport(); 
 
 		m_PlayerPosition[2] *= -1;  
@@ -42,9 +41,8 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	}
 	else
 	{
-		m_PlayerPosition = (utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) 
-							* m_PlayerPosition 
-							* ~utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec)).Grade3();
+		Motor transformationMotor{ utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) };
+		m_PlayerPosition = (transformationMotor * m_PlayerPosition * ~transformationMotor).Grade3();
 	}
 	
 	// Update the player color
@@ -59,21 +57,21 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	// Increase or decrease Player's energy
 	if (m_HasShiftBeenPressed)
 	{
-		if (m_PlayerPosition[2] > m_PlayerMinEnergy)
+		if (m_PlayerPosition[2] > m_PlayerMinEnergy) 
 		{
 			m_PlayerPosition[2] = std::max(m_PlayerMinEnergy, m_PlayerPosition[2] - m_EnergyDrainSpeed * elapsedSec);
 		}
 		else
 		{
-			m_HasShiftBeenPressed = false;
-			m_PlayerMovementDirection /= 2;
-			m_PlayerVelocity /= 2;
-			m_CooldownTimer = m_CooldownDuration;
+			m_HasShiftBeenPressed = false; 
+			m_PlayerMovementDirection = m_BaseMovementDirection;  
+			m_PlayerVelocity = m_BaseVelocity;  
+			m_CooldownTimer = m_CooldownDuration;  
 		}
 	}
 	else
 	{
-		if (m_PlayerPosition[2] < m_PlayerEnergy)
+		if (m_PlayerPosition[2] < m_PlayerEnergy) 
 		{
 			m_PlayerPosition[2] = std::min(m_PlayerPosition[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerEnergy);
 		}
@@ -94,6 +92,7 @@ void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e, const size_t pillarA
 		{
 			m_HasShiftBeenPressed = true;
 			m_PlayerVelocity *= 2;
+			m_PlayerMovementDirection *= 2; 
 		}
 	}
 
@@ -125,7 +124,6 @@ void Player::PlayerKeyUpEvent(const SDL_KeyboardEvent& e)
 		if (m_HasShiftBeenPressed)
 		{
 			m_HasShiftBeenPressed = false;
-			m_PlayerVelocity /= 2;
 		}
 	}
 }
@@ -151,6 +149,11 @@ int Player::GetCurrentPillarIndex() const
 ThreeBlade Player::GetPlayerPosition() const
 {
 	return m_PlayerPosition; 
+}
+
+void Player::IncreasePlayerEnergy(const float energy)
+{
+	m_PlayerEnergy += energy;  
 }
 
 void Player::UpdatePlayerColor()

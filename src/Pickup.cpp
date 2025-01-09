@@ -1,6 +1,8 @@
 #include <iostream>
+#include "ScoreManager.h"
 #include "structs.h"
 #include "Pickup.h"
+#include "Player.h"
 #include "utils.h"
 
 
@@ -22,16 +24,20 @@ Pickup::~Pickup()
 {
 }
 
-void Pickup::Update(float elapsedSec, const ThreeBlade& playerPos)
+void Pickup::Update(float elapsedSec, Player& player) 
 {
 	const float padding{ 40.f };
 	const float randomPosX{ m_WindowDimentions.x - m_PickupDimensions };
 	const float randomPosY{ m_WindowDimentions.y - m_PickupDimensions };
+	const ThreeBlade& playerPos{ player.GetPlayerPosition() };
 
-	if (CheckCollision(playerPos)[3] <= padding && CheckCollision(playerPos)[4] <= padding)
+	if (CheckCollision(playerPos)[3] <= padding && CheckCollision(playerPos)[4] <= padding) 
 	{
 		m_PickupPosition[0] = float(rand() % static_cast<int>(randomPosX));
 		m_PickupPosition[1] = float(rand() % static_cast<int>(randomPosY));
+
+		ScoreManager::GetInstance().AddScore(10);
+		player.IncreasePlayerEnergy(10.f);
 	}
 }
 

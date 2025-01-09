@@ -220,9 +220,6 @@ void Game::CleanupGameEngine()
 	SDL_Quit();
 }
 
-// give it ThreeBlade parameter and boolean parameter
-// Threeblade -> player or enemy
-// boolean -> should it rotate or not
 void Game::ViewPortCollisionDetection(const Player& entityPos, bool isRotating)
 {
 	for (OneBlade plane : m_ViewportPlanes) 
@@ -254,7 +251,7 @@ void Game::Update(float elapsedSec)
 	m_Player.Update(elapsedSec, m_Pillars[m_Player.GetCurrentPillarIndex()]->GetPillarPosition()); 
 
 	// Update the pickup
-	m_Pickup.Update(elapsedSec, m_Player.GetPlayerPosition());
+	m_Pickup.Update(elapsedSec, m_Player);
 } 
 
 void Game::Draw() const

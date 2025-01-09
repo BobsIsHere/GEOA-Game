@@ -311,7 +311,7 @@ Motor utils::MakeTranslationMotor(TwoBlade velocity, float elapsedSec)
 	return translator;
 }
 
-TwoBlade utils::RotateVelocity(TwoBlade velocity, ThreeBlade pillar, float angle)
+TwoBlade utils::RotateVelocity(TwoBlade velocity, float angle)
 {
 	Motor rotation{ Motor::Rotation(angle, TwoBlade{ 0, 0, 0, 0, 0, 1 }) };
 	return (rotation * velocity * ~rotation).Grade2();

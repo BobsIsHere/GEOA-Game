@@ -22,8 +22,9 @@ public:
 	void PlaneCollisions(OneBlade plane, const float distance);  
 
 	int GetCurrentPillarIndex() const;
-
 	ThreeBlade GetPlayerPosition() const;
+
+	void IncreasePlayerEnergy(const float energy);
 
 private:
 	void UpdatePlayerColor(); 
@@ -37,13 +38,16 @@ private:
 
 	const float m_PlayerDimensions = 40.f;
 	const float m_PlayerMinEnergy = 0.f;
-	const float m_PlayerEnergy = 100.0f;
 	const float m_EnergyDrainSpeed = 60.f;
 	const float m_CooldownDuration = 1.0f;
 
+	float m_PlayerEnergy = 100.f; 
 	float m_CooldownTimer;
 
 	Point2f m_WindowDimentions;
+
+	const TwoBlade m_BaseVelocity = TwoBlade{ 0, 0, 0, 0, 0, 1 };
+	const TwoBlade m_BaseMovementDirection = TwoBlade{ 1, 0, 0, 0, 0, 400 }; 
 
 	TwoBlade m_PlayerVelocity;
 	TwoBlade m_PlayerMovementDirection;
