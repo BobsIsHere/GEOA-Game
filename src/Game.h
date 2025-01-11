@@ -9,6 +9,7 @@
 #include "Player.h"
 #include "Pillar.h"
 #include "Pickup.h"
+#include "Enemy.h"
 
 class Game
 {
@@ -55,7 +56,8 @@ private:
 	void InitializeGameEngine();
 	void InitializeGameVariables();
 	void CleanupGameEngine();
-	void ViewPortCollisionDetection(const Player& entityPos, bool isRotating);
+	void ViewPortCollisionDetection(Player& entity, bool isRotating);
+	void ViewPortCollisionDetection(Enemy& entity, bool isRotating);
 
 	// DATA MEMBERS
 	// The window properties
@@ -78,6 +80,7 @@ private:
 	OneBlade m_BottomPlane;
 
 	Player m_Player; 
+	Enemy m_Enemy;
 	Pickup m_Pickup;
 };
 

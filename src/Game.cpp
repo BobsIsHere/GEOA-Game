@@ -16,7 +16,8 @@ Game::Game(const Window& window) :
 	m_Initialized{ false },
 	m_MaxElapsedSeconds{ 0.1f },
 	m_Player{ 200.f, 200.f, Point2f{ window.width, window.height } },
-	m_Pickup{ Point2f{ window.width, window.height } } 
+	m_Pickup{ Point2f{ window.width, window.height } },
+	m_Enemy{ ThreeBlade{ 400.f, 400.f, 0.f } } 
 {
 	InitializeGameEngine();
 	InitializeGameVariables();
@@ -207,24 +208,46 @@ void Game::CleanupGameEngine()
 	SDL_Quit();
 }
 
-void Game::ViewPortCollisionDetection(const Player& entityPos, bool isRotating)
+void Game::ViewPortCollisionDetection(Player& entity, bool isRotating)
 {
 	for (OneBlade plane : m_ViewportPlanes) 
 	{
-		const float distance{ utils::ComputeDistance(entityPos.GetPlayerPosition(), plane)};
+		const float distance{ utils::ComputeDistance(entity.GetPlayerPosition(), plane)};
 
 		// Check if the current plane is left or right and has reflection logic
 		if (plane == m_RightPlane)   
 		{
-			m_Player.PlaneCollisions(m_LeftPlane, distance); 
+			entity.PlaneCollisions(m_LeftPlane, distance);
 		}
 		else if (plane == m_TopPlane)
 		{
-			m_Player.PlaneCollisions(m_BottomPlane, distance); 
+			entity.PlaneCollisions(m_BottomPlane, distance);
 		}
 		else
 		{
-			m_Player.PlaneCollisions(plane, distance); 
+			entity.PlaneCollisions(plane, distance);
+		}
+	}
+}
+
+void Game::ViewPortCollisionDetection(Enemy& entity, bool isRotating)
+{
+	for (OneBlade plane : m_ViewportPlanes)
+	{
+		const float distance{ utils::ComputeDistance(entity.GetPosition(), plane) };
+
+		// Check if the current plane is left or right and has reflection logic
+		if (plane == m_RightPlane)
+		{
+			entity.PlaneCollisions(m_LeftPlane, distance);
+		}
+		else if (plane == m_TopPlane)
+		{
+			entity.PlaneCollisions(m_BottomPlane, distance);
+		}
+		else
+		{
+			entity.PlaneCollisions(plane, distance);
 		}
 	}
 }
@@ -233,6 +256,7 @@ void Game::Update(float elapsedSec)
 {
 	// Check for collision with the viewport
 	ViewPortCollisionDetection(m_Player, true);   
+	ViewPortCollisionDetection(m_Enemy, false);   
 
 	// Get current pillar index
 	const int currentPillarIndex{ m_Player.GetCurrentPillarIndex() };
@@ -240,6 +264,9 @@ void Game::Update(float elapsedSec)
 
 	// Update the player
 	m_Player.Update(elapsedSec, currentPillarPos); 
+
+	// Update Enemy
+	m_Enemy.Update(elapsedSec); 
 
 	// Update the pickup
 	m_Pickup.Update(elapsedSec, m_Player);
@@ -251,6 +278,7 @@ void Game::Draw() const
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	m_Player.Draw();
+	m_Enemy.Draw(); 
 	m_Pickup.Draw();
 
 	PillarManager::GetInstance().Draw(m_Player.GetCurrentPillarIndex());
