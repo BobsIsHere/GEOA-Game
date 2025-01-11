@@ -1,5 +1,6 @@
+#pragma once
 
-class ScoreManager
+class ScoreManager final
 {
 public:
 	static ScoreManager& GetInstance()

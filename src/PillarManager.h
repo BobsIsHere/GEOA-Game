@@ -4,7 +4,7 @@
 #include "FlyFish.h"
 #include "Pillar.h"
 
-class PillarManager
+class PillarManager final
 {
 public:
 	static PillarManager& GetInstance()

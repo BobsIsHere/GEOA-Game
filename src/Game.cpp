@@ -118,8 +118,6 @@ void Game::InitializeGameVariables()
 	m_ViewportPlanes.push_back(m_RightPlane);
 	m_ViewportPlanes.push_back(m_TopPlane);
 	m_ViewportPlanes.push_back(m_BottomPlane);
-
-	m_PlayerColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
 }
 
 void Game::Run()

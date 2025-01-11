@@ -3,7 +3,7 @@
 
 class Player; 
 
-class Pickup
+class Pickup final
 {
 public:
 	explicit Pickup(Point2f window);

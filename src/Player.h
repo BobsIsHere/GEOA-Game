@@ -5,7 +5,7 @@
 #include "FlyFish.h"
 #include "structs.h"
 
-class Player
+class Player final
 {
 public:
 	explicit Player(float xPos, float yPos, Point2f window);

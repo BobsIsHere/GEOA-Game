@@ -2,7 +2,7 @@
 #include "structs.h"
 #include "FlyFish.h"
 
-class Pillar
+class Pillar final
 {
 public:
 	explicit Pillar(ThreeBlade pillarPos);

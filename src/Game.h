@@ -77,8 +77,6 @@ private:
 	OneBlade m_TopPlane;
 	OneBlade m_BottomPlane;
 
-	Color4f m_PlayerColor; 
-
 	Player m_Player; 
 	Pickup m_Pickup;
 };
