@@ -1,4 +1,6 @@
 #include <algorithm>
+
+#include "PillarManager.h"
 #include "Player.h"
 #include "utils.h"
 
@@ -84,7 +86,7 @@ void Player::Draw() const
 	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1], m_PlayerDimensions, m_PlayerDimensions); 
 }
 
-void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e, const size_t pillarAmount)
+void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e)
 {
 	if (e.keysym.sym == SDLK_LSHIFT)
 	{
@@ -108,8 +110,10 @@ void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e, const size_t pillarA
 
 	if (e.keysym.sym == SDLK_q)
 	{
+		const size_t pillarAmount{ PillarManager::GetInstance().GetPillarAmount() };
+
 		// Switch between pillars
-		if (pillarAmount >= 0)
+		if (pillarAmount >= 0) 
 		{
 			// Increment and wrap around
 			m_CurrentPillarIndex = (m_CurrentPillarIndex + 1) % pillarAmount; 
@@ -121,10 +125,15 @@ void Player::PlayerKeyUpEvent(const SDL_KeyboardEvent& e)
 {
 	if (e.keysym.sym == SDLK_LSHIFT)
 	{
-		if (m_HasShiftBeenPressed)
-		{
-			m_HasShiftBeenPressed = false;
-		}
+		m_HasShiftBeenPressed = false;
+	}
+}
+
+void Player::PlayerMouseDownEvent(const SDL_MouseButtonEvent& e)
+{
+	if (e.button == SDL_BUTTON_LEFT)
+	{
+		SpawnPillar(ThreeBlade{ float(e.x), float(e.y), 0.f });
 	}
 }
 
@@ -176,4 +185,9 @@ void Player::ClampToViewport()
 	// Clamp the player position to the viewport
 	m_PlayerPosition[0] = std::clamp(m_PlayerPosition[0], m_PlayerDimensions, static_cast<float>(m_WindowDimentions.x - m_PlayerDimensions));
 	m_PlayerPosition[1] = std::clamp(m_PlayerPosition[1], m_PlayerDimensions, static_cast<float>(m_WindowDimentions.y - m_PlayerDimensions));
+}
+
+void Player::SpawnPillar(const ThreeBlade& spawnPosition)
+{
+	PillarManager::GetInstance().SpawnPillar(spawnPosition);
 }

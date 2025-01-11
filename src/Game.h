@@ -4,6 +4,8 @@
 #include "structs.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
+
+#include "PillarManager.h"
 #include "Player.h"
 #include "Pillar.h"
 #include "Pickup.h"
@@ -26,7 +28,7 @@ public:
 	// Event handling
 	void ProcessKeyDownEvent(const SDL_KeyboardEvent& e)
 	{
-		m_Player.PlayerKeyDownEvent(e, m_Pillars.size()); 
+		m_Player.PlayerKeyDownEvent(e); 
 	}
 	void ProcessKeyUpEvent(const SDL_KeyboardEvent& e)
 	{
@@ -37,6 +39,7 @@ public:
 	}
 	void ProcessMouseDownEvent(const SDL_MouseButtonEvent& e)
 	{
+		m_Player.PlayerMouseDownEvent(e); 
 	}
 	void ProcessMouseUpEvent(const SDL_MouseButtonEvent& e)
 	{
@@ -75,12 +78,9 @@ private:
 	OneBlade m_BottomPlane;
 
 	Color4f m_PlayerColor; 
-	Color4f m_PillarColor; 
-	Color4f m_SelectedPillarColor; 
 
 	Player m_Player; 
 	Pickup m_Pickup;
-	std::vector<Pillar*> m_Pillars;  
 };
 
 /*

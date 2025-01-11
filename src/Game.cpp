@@ -119,12 +119,7 @@ void Game::InitializeGameVariables()
 	m_ViewportPlanes.push_back(m_TopPlane);
 	m_ViewportPlanes.push_back(m_BottomPlane);
 
-	m_Pillars.push_back(new Pillar{ ThreeBlade{ 400, 300, 0, 1 } });
-	m_Pillars.push_back(new Pillar{ ThreeBlade{ 900, 500, 0, 1 } });
-
 	m_PlayerColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
-	m_PillarColor = Color4f{ 1.f, 0.f, 1.f, 1.f };
-	m_SelectedPillarColor = Color4f{ 1.f, 1.f, 0.f, 1.f }; 
 }
 
 void Game::Run()
@@ -204,12 +199,6 @@ void Game::Run()
 
 void Game::CleanupGameEngine()
 {
-	for (const Pillar* pillar : m_Pillars)
-	{
-		delete pillar;
-		pillar = nullptr; 
-	}
-
 	SDL_GL_DeleteContext(m_pContext);
 
 	SDL_DestroyWindow(m_pWindow);
@@ -247,8 +236,12 @@ void Game::Update(float elapsedSec)
 	// Check for collision with the viewport
 	ViewPortCollisionDetection(m_Player, true);   
 
+	// Get current pillar index
+	const int currentPillarIndex{ m_Player.GetCurrentPillarIndex() };
+	const ThreeBlade currentPillarPos{ PillarManager::GetInstance().GetPillarPosition(currentPillarIndex) }; 
+
 	// Update the player
-	m_Player.Update(elapsedSec, m_Pillars[m_Player.GetCurrentPillarIndex()]->GetPillarPosition()); 
+	m_Player.Update(elapsedSec, currentPillarPos); 
 
 	// Update the pickup
 	m_Pickup.Update(elapsedSec, m_Player);
@@ -262,15 +255,5 @@ void Game::Draw() const
 	m_Player.Draw();
 	m_Pickup.Draw();
 
-	for (size_t idx = 0; idx < m_Pillars.size(); ++idx)
-	{
-		if (idx == m_Player.GetCurrentPillarIndex()) 
-		{
-			m_Pillars[idx]->Draw(m_SelectedPillarColor); 
-		}
-		else
-		{
-			m_Pillars[idx]->Draw(m_PillarColor);
-		}
-	}
+	PillarManager::GetInstance().Draw(m_Player.GetCurrentPillarIndex());
 }

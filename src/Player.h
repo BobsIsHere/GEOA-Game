@@ -1,5 +1,7 @@
+#pragma once
 #include "SDL_opengl.h"
 #include "SDL.h"
+
 #include "FlyFish.h"
 #include "structs.h"
 
@@ -17,8 +19,10 @@ public:
 	void Update(float elapsedSec, ThreeBlade pillarPos);
 	void Draw() const;
 
-	void PlayerKeyDownEvent(const SDL_KeyboardEvent& e, const size_t pillarAmount); 
+	void PlayerKeyDownEvent(const SDL_KeyboardEvent& e); 
 	void PlayerKeyUpEvent(const SDL_KeyboardEvent& e);
+	void PlayerMouseDownEvent(const SDL_MouseButtonEvent& e);
+	
 	void PlaneCollisions(OneBlade plane, const float distance);  
 
 	int GetCurrentPillarIndex() const;
@@ -29,6 +33,7 @@ public:
 private:
 	void UpdatePlayerColor(); 
 	void ClampToViewport(); 
+	void SpawnPillar(const ThreeBlade& spawnPosition); 
 
 	bool m_HasShiftBeenPressed;
 	bool m_ShouldReflect;
