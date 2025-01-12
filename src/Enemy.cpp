@@ -1,5 +1,6 @@
 #include "Enemy.h"
 #include "utils.h"
+#include "ScoreManager.h"
 
 Enemy::Enemy(ThreeBlade position)
 {
@@ -10,7 +11,7 @@ Enemy::Enemy(ThreeBlade position)
 
 	// Randomize Movement Direction
 	srand(time(nullptr));
-	m_MovementDirection = utils::RotateBladeDirection(m_MovementDirection, rand() % 90);
+	m_MovementDirection = utils::RotateBladeDirection(m_MovementDirection, rand() % 60);
 }
 
 Enemy::~Enemy()
@@ -19,8 +20,20 @@ Enemy::~Enemy()
 
 void Enemy::Update(float elapsedSec)
 {
+}
+
+void Enemy::Update(float elapsedSec, Player& player)
+{
 	Motor transformationMotor{ utils::MakeTranslationMotor(m_MovementDirection, elapsedSec) };
 	m_Position = (transformationMotor * m_Position * ~transformationMotor).Grade3();
+
+	// Check Collisions with Player
+	const ThreeBlade& playerPos{ player.GetPosition() }; 
+	if (CheckEntityCollisions(playerPos)[3] <= 40.f && CheckEntityCollisions(playerPos)[4] <= 40.f)
+	{
+		m_MovementDirection *= -1;
+		ScoreManager::GetInstance().AddScore(-10);
+	}
 }
 
 void Enemy::Draw() const
@@ -35,6 +48,12 @@ void Enemy::PlaneCollisions(OneBlade plane, const float distance)
 	{
 		m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
 	}
+}
+
+TwoBlade Enemy::CheckEntityCollisions(const ThreeBlade& entity)
+{
+	TwoBlade distance{ utils::ComputeDistance(m_Position, entity) };
+	return utils::Abs(distance);
 }
 
 ThreeBlade Enemy::GetPosition() const

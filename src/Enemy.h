@@ -2,6 +2,7 @@
 #include "Entity.h"
 #include "structs.h"
 #include "FlyFish.h" 
+#include "Player.h"
 
 class Enemy final : public Entity
 {
@@ -15,8 +16,11 @@ public:
 	Enemy& operator=(Enemy&& other) = delete;
 
 	void Update(float elapsedSec) override;
+	void Update(float elapsedSec, Player& player);
 	void Draw() const override;
 	void PlaneCollisions(OneBlade plane, const float distance) override;
+
+	TwoBlade CheckEntityCollisions(const ThreeBlade& entity); 
 
 	ThreeBlade GetPosition() const override;
 

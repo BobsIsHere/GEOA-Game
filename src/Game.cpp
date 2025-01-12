@@ -266,7 +266,7 @@ void Game::Update(float elapsedSec)
 	m_Player.Update(elapsedSec, currentPillarPos); 
 
 	// Update Enemy
-	m_Enemy.Update(elapsedSec); 
+	m_Enemy.Update(elapsedSec, m_Player); 
 
 	// Update the pickup
 	m_Pickup.Update(elapsedSec, m_Player);
