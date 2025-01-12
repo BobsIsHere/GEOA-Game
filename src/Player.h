@@ -28,6 +28,7 @@ public:
 	void PlaneCollisions(OneBlade plane, const float distance);  
 
 	int GetCurrentPillarIndex() const;
+	float GetDimensions() const override;
 	ThreeBlade GetPosition() const;
 
 	void IncreasePlayerEnergy(const float energy);

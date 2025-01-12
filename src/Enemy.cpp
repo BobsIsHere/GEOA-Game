@@ -28,8 +28,10 @@ void Enemy::Update(float elapsedSec, Player& player)
 	m_Position = (transformationMotor * m_Position * ~transformationMotor).Grade3();
 
 	// Check Collisions with Player
+	const float playerDimensions{ player.GetDimensions() };
 	const ThreeBlade& playerPos{ player.GetPosition() }; 
-	if (CheckEntityCollisions(playerPos)[3] <= 40.f && CheckEntityCollisions(playerPos)[4] <= 40.f)
+
+	if (CheckEntityCollisions(playerPos)[3] <= playerDimensions && CheckEntityCollisions(playerPos)[4] <= playerDimensions)
 	{
 		m_MovementDirection *= -1;
 		ScoreManager::GetInstance().AddScore(-10);

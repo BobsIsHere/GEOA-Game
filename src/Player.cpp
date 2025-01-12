@@ -160,6 +160,11 @@ int Player::GetCurrentPillarIndex() const
 	return m_CurrentPillarIndex; 
 }
 
+float Player::GetDimensions() const
+{
+	return m_Dimensions; 
+}
+
 ThreeBlade Player::GetPosition() const
 {
 	return m_Position;  
