@@ -7,6 +7,10 @@ Enemy::Enemy(ThreeBlade position)
 	m_Color = Color4f{ 0.f, 0.f, 1.f, 1.f };
 	m_MovementDirection = TwoBlade{ 1, 0, 0, 0, 0, 400 };
 	m_Position = position;
+
+	// Randomize Movement Direction
+	srand(time(nullptr));
+	m_MovementDirection = utils::RotateBladeDirection(m_MovementDirection, rand() % 90);
 }
 
 Enemy::~Enemy()
@@ -17,8 +21,6 @@ void Enemy::Update(float elapsedSec)
 {
 	Motor transformationMotor{ utils::MakeTranslationMotor(m_MovementDirection, elapsedSec) };
 	m_Position = (transformationMotor * m_Position * ~transformationMotor).Grade3();
-
-	//m_MovementDirection = utils::RotateVelocity(m_MovementDirection, 45.f * elapsedSec);
 }
 
 void Enemy::Draw() const

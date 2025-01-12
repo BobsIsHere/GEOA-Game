@@ -34,8 +34,8 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 		const float rotationAngle{ 45.f * elapsedSec };
 		m_Position = utils::RotateAroundPillar(m_Position, pillarPos, m_PlayerVelocity, rotationAngle);
 
-		m_MovementDirection = utils::RotateVelocity(m_MovementDirection, rotationAngle);
-		m_PlayerVelocity = utils::RotateVelocity(m_PlayerVelocity, rotationAngle); 
+		m_MovementDirection = utils::RotateBladeDirection(m_MovementDirection, rotationAngle);
+		m_PlayerVelocity = utils::RotateBladeDirection(m_PlayerVelocity, rotationAngle); 
 	}
 	else if (m_ShouldReflect)
 	{

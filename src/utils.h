@@ -59,7 +59,7 @@ namespace utils
 	TwoBlade Abs(TwoBlade blade); 
 
 	Motor MakeTranslationMotor(TwoBlade velocity, float elapsedSec);
-	TwoBlade RotateVelocity(TwoBlade velocity, float angle);
+	TwoBlade RotateBladeDirection(TwoBlade velocity, float angle);
 	ThreeBlade RotateAroundPillar(ThreeBlade player, ThreeBlade pillar, TwoBlade velocity, float angle); 
 
 #pragma endregion FlyingFishHelpers
