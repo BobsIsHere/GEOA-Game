@@ -1,8 +1,9 @@
 #pragma once
+#include "Entity.h"
 #include "structs.h"
 #include "FlyFish.h" 
 
-class Enemy final
+class Enemy final : public Entity
 {
 public:
 	explicit Enemy(ThreeBlade position);
@@ -13,17 +14,12 @@ public:
 	Enemy(Enemy&& other) = delete;
 	Enemy& operator=(Enemy&& other) = delete;
 
-	void Update(float elapsedSec);
-	void Draw() const;
-	void PlaneCollisions(OneBlade plane, const float distance);
+	void Update(float elapsedSec) override;
+	void Draw() const override;
+	void PlaneCollisions(OneBlade plane, const float distance) override;
 
-	ThreeBlade GetPosition() const;
+	ThreeBlade GetPosition() const override;
 
 private:
-	const float m_EnemyDimensions = 30.f;
 
-	Color4f m_EnemyColor;
-
-	TwoBlade m_MovementDirection;
-	ThreeBlade m_EnemyPosition;
 };

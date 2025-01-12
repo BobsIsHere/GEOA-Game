@@ -11,14 +11,19 @@ Player::Player(float xPos, float yPos, Point2f window) :
 	m_CurrentPillarIndex{},
 	m_CooldownTimer{},
 	m_PlayerVelocity{ m_BaseVelocity }, 
-	m_PlayerMovementDirection{ m_BaseMovementDirection }, 
-	m_PlayerColor{ 0.f, 1.f, 0.f, 1.f },
 	m_WindowDimentions{ window } 
 {
-	m_PlayerPosition = ThreeBlade{ xPos, yPos, m_PlayerEnergy, 1 }; 
+	m_Dimensions = 40.f;
+	m_Color = Color4f{ 0.f, 1.f, 0.f, 1.f };
+	m_MovementDirection = m_BaseMovementDirection; 
+	m_Position = ThreeBlade{ xPos, yPos, m_PlayerEnergy, 1 }; 
 }
 
 Player::~Player()
+{
+}
+
+void Player::Update(float elapsedSec)
 {
 }
 
@@ -27,24 +32,24 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	if (m_IsRotating)
 	{
 		const float rotationAngle{ 45.f * elapsedSec };
-		m_PlayerPosition = utils::RotateAroundPillar(m_PlayerPosition, pillarPos, m_PlayerVelocity, rotationAngle); 
+		m_Position = utils::RotateAroundPillar(m_Position, pillarPos, m_PlayerVelocity, rotationAngle);
 
-		m_PlayerMovementDirection = utils::RotateVelocity(m_PlayerMovementDirection, rotationAngle); 
+		m_MovementDirection = utils::RotateVelocity(m_MovementDirection, rotationAngle);
 		m_PlayerVelocity = utils::RotateVelocity(m_PlayerVelocity, rotationAngle); 
 	}
 	else if (m_ShouldReflect)
 	{
-		Motor transformationMotor{ utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) };
-		m_PlayerPosition = (-pillarPos * -transformationMotor * m_PlayerPosition * ~transformationMotor * ~pillarPos).Grade3(); 
+		Motor transformationMotor{ utils::MakeTranslationMotor(m_MovementDirection, elapsedSec) };
+		m_Position = (-pillarPos * -transformationMotor * m_Position * ~transformationMotor * ~pillarPos).Grade3();
 		ClampToViewport(); 
 
-		m_PlayerPosition[2] *= -1;  
+		m_Position[2] *= -1; 
 		m_ShouldReflect = false;  
 	}
 	else
 	{
-		Motor transformationMotor{ utils::MakeTranslationMotor(m_PlayerMovementDirection, elapsedSec) };
-		m_PlayerPosition = (transformationMotor * m_PlayerPosition * ~transformationMotor).Grade3();
+		Motor transformationMotor{ utils::MakeTranslationMotor(m_MovementDirection, elapsedSec) };
+		m_Position = (transformationMotor * m_Position * ~transformationMotor).Grade3(); 
 	}
 	
 	// Update the player color
@@ -59,42 +64,42 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	// Increase or decrease Player's energy
 	if (m_HasShiftBeenPressed)
 	{
-		if (m_PlayerPosition[2] > m_PlayerMinEnergy) 
+		if (m_Position[2] > m_PlayerMinEnergy)
 		{
-			m_PlayerPosition[2] = std::max(m_PlayerMinEnergy, m_PlayerPosition[2] - m_EnergyDrainSpeed * elapsedSec);
+			m_Position[2] = std::max(m_PlayerMinEnergy, m_Position[2] - m_EnergyDrainSpeed * elapsedSec);
 		}
 		else
 		{
 			m_HasShiftBeenPressed = false; 
-			m_PlayerMovementDirection = m_BaseMovementDirection;  
+			m_MovementDirection = m_BaseMovementDirection; 
 			m_PlayerVelocity = m_BaseVelocity;  
 			m_CooldownTimer = m_CooldownDuration;  
 		}
 	}
 	else
 	{
-		if (m_PlayerPosition[2] < m_PlayerEnergy) 
+		if (m_Position[2] < m_PlayerEnergy)
 		{
-			m_PlayerPosition[2] = std::min(m_PlayerPosition[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerEnergy);
+			m_Position[2] = std::min(m_Position[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerEnergy);
 		}
 	}
 }
 
 void Player::Draw() const
 {
-	utils::SetColor(m_PlayerColor);
-	utils::FillRect(m_PlayerPosition[0], m_PlayerPosition[1], m_PlayerDimensions, m_PlayerDimensions); 
+	utils::SetColor(m_Color);
+	utils::FillRect(m_Position[0], m_Position[1], m_Dimensions, m_Dimensions);
 }
 
 void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e)
 {
 	if (e.keysym.sym == SDLK_LSHIFT)
 	{
-		if (!m_HasShiftBeenPressed && m_CooldownTimer <= 0.0f && m_PlayerPosition[2] > m_PlayerMinEnergy) 
+		if (!m_HasShiftBeenPressed && m_CooldownTimer <= 0.0f && m_Position[2] > m_PlayerMinEnergy)
 		{
 			m_HasShiftBeenPressed = true;
 			m_PlayerVelocity *= 2;
-			m_PlayerMovementDirection *= 2; 
+			m_MovementDirection *= 2;  
 		}
 	}
 
@@ -139,9 +144,9 @@ void Player::PlayerMouseDownEvent(const SDL_MouseButtonEvent& e)
 
 void Player::PlaneCollisions(OneBlade plane, const float distance)
 {
-	if (distance < m_PlayerDimensions)
+	if (distance < m_Dimensions)
 	{
-		m_PlayerMovementDirection = (plane * m_PlayerMovementDirection * ~plane).Grade2(); 
+		m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2(); 
 
 		if (m_IsRotating)
 		{
@@ -155,9 +160,9 @@ int Player::GetCurrentPillarIndex() const
 	return m_CurrentPillarIndex; 
 }
 
-ThreeBlade Player::GetPlayerPosition() const
+ThreeBlade Player::GetPosition() const
 {
-	return m_PlayerPosition; 
+	return m_Position;  
 }
 
 void Player::IncreasePlayerEnergy(const float energy)
@@ -172,19 +177,19 @@ void Player::UpdatePlayerColor()
 	Color4f highEnergyColor = Color4f{ 0.0f, 1.0f, 0.0f, 1.0f };
 
 	// Calculate the energy ratio (0.0 to 1.0)
-	float energyRatio = (m_PlayerPosition[2] - m_PlayerMinEnergy) / (m_PlayerEnergy - m_PlayerMinEnergy); 
+	float energyRatio = (m_Position[2] - m_PlayerMinEnergy) / (m_PlayerEnergy - m_PlayerMinEnergy); 
 
 	// Interpolate the color based on the energy ratio
-	m_PlayerColor.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r);
-	m_PlayerColor.g = lowEnergyColor.g + energyRatio * (highEnergyColor.g - lowEnergyColor.g);
-	m_PlayerColor.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b);
+	m_Color.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r);
+	m_Color.g = lowEnergyColor.g + energyRatio * (highEnergyColor.g - lowEnergyColor.g);
+	m_Color.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b);
 }
 
 void Player::ClampToViewport()
 {
 	// Clamp the player position to the viewport
-	m_PlayerPosition[0] = std::clamp(m_PlayerPosition[0], m_PlayerDimensions, static_cast<float>(m_WindowDimentions.x - m_PlayerDimensions));
-	m_PlayerPosition[1] = std::clamp(m_PlayerPosition[1], m_PlayerDimensions, static_cast<float>(m_WindowDimentions.y - m_PlayerDimensions));
+	m_Position[0] = std::clamp(m_Position[0], m_Dimensions, static_cast<float>(m_WindowDimentions.x - m_Dimensions));
+	m_Position[1] = std::clamp(m_Position[1], m_Dimensions, static_cast<float>(m_WindowDimentions.y - m_Dimensions));
 }
 
 void Player::SpawnPillar(const ThreeBlade& spawnPosition)

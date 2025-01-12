@@ -212,7 +212,7 @@ void Game::ViewPortCollisionDetection(Player& entity, bool isRotating)
 {
 	for (OneBlade plane : m_ViewportPlanes) 
 	{
-		const float distance{ utils::ComputeDistance(entity.GetPlayerPosition(), plane)};
+		const float distance{ utils::ComputeDistance(entity.GetPosition(), plane)};
 
 		// Check if the current plane is left or right and has reflection logic
 		if (plane == m_RightPlane)   

@@ -29,7 +29,7 @@ void Pickup::Update(float elapsedSec, Player& player)
 	const float padding{ 40.f };
 	const float randomPosX{ m_WindowDimentions.x - m_PickupDimensions };
 	const float randomPosY{ m_WindowDimentions.y - m_PickupDimensions };
-	const ThreeBlade& playerPos{ player.GetPlayerPosition() };
+	const ThreeBlade& playerPos{ player.GetPosition() };
 
 	if (CheckCollision(playerPos)[3] <= padding && CheckCollision(playerPos)[4] <= padding) 
 	{
