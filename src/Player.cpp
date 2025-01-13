@@ -166,6 +166,11 @@ ThreeBlade Player::GetPosition() const
 	return m_Position;  
 }
 
+void Player::SetMovementDirection(const float directionMultiplier)
+{
+	m_MovementDirection *= directionMultiplier; 
+}
+
 void Player::IncreasePlayerEnergy(const float energy)
 {
 	m_PlayerEnergy += energy;  

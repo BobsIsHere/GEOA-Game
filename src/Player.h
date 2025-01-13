@@ -30,6 +30,7 @@ public:
 	float GetDimensions() const override;
 	ThreeBlade GetPosition() const;
 
+	void SetMovementDirection(const float directionMultiplier);
 	void IncreasePlayerEnergy(const float energy);
 
 private:
