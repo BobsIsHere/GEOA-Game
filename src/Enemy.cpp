@@ -31,7 +31,9 @@ void Enemy::Update(float elapsedSec, Player& player)
 	if (CheckEntityCollisions(playerPos)[3] <= playerDimensions && CheckEntityCollisions(playerPos)[4] <= playerDimensions)
 	{
 		m_MovementDirection *= -1;
+
 		player.SetMovementDirection(-1);
+		player.IncreasePlayerEnergy(-10.f);
 
 		ScoreManager::GetInstance().AddScore(-10);
 	}
