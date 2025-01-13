@@ -15,8 +15,10 @@ public:
 	Entity& operator=(Entity&&) noexcept = default;
 
 	virtual void Draw() const = 0;
-	virtual void PlaneCollisions(OneBlade plane, const float distance) = 0;
+	virtual void LeftRightPlaneCollisions(OneBlade plane, const float distance) = 0;
+	virtual void TopBottomPlaneCollisions(OneBlade plane, const float distance) = 0;
 	virtual float GetDimensions() const = 0;
+	virtual TwoBlade GetMovementDirection() const = 0;
 	virtual ThreeBlade GetPosition() const = 0;
 	 
 protected:

@@ -7,7 +7,7 @@
 class Enemy final : public Entity
 {
 public:
-	explicit Enemy(ThreeBlade position);
+	explicit Enemy(ThreeBlade position, Point2f window); 
 	~Enemy();
 
 	Enemy(const Enemy& other) = delete;
@@ -17,13 +17,15 @@ public:
 
 	void Update(float elapsedSec, Player& player);
 	void Draw() const override;
-	void PlaneCollisions(OneBlade plane, const float distance) override;
+	void LeftRightPlaneCollisions(OneBlade plane, const float distance) override;
+	void TopBottomPlaneCollisions(OneBlade plane, const float distance) override;
 
 	float GetDimensions() const override; 
+	TwoBlade GetMovementDirection() const override;
 	TwoBlade CheckEntityCollisions(const ThreeBlade& entity); 
 
 	ThreeBlade GetPosition() const override;
 
 private:
-
+	Point2f m_WindowDimentions; 
 };

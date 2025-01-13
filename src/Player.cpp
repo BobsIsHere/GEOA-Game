@@ -138,15 +138,72 @@ void Player::PlayerMouseDownEvent(const SDL_MouseButtonEvent& e)
 	}
 }
 
-void Player::PlaneCollisions(OneBlade plane, const float distance)
+void Player::LeftRightPlaneCollisions(OneBlade plane, const float distance)
 {
-	if (distance < m_Dimensions)
-	{
-		m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2(); 
+	const float offset{ 5.f };
 
-		if (m_IsRotating)
+	// if going left
+	if (m_MovementDirection[0] <= 0)
+	{
+		// distance between left and wall = 0 or smaller
+		if (distance <= offset)
 		{
-			m_PlayerVelocity = -m_PlayerVelocity;
+			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
+			m_Position[0] = offset; 
+
+			if (m_IsRotating)
+			{
+				m_PlayerVelocity = -m_PlayerVelocity;
+			}
+		}
+	}
+	else
+	{
+		// distance between right and wall = width or smaller
+		if (distance <= offset)
+		{
+			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
+			m_Position[0] = m_WindowDimentions.x - m_Dimensions - offset; 
+
+			if (m_IsRotating)
+			{
+				m_PlayerVelocity = -m_PlayerVelocity;
+			}
+		}
+	}
+}
+
+void Player::TopBottomPlaneCollisions(OneBlade plane, const float distance)
+{
+	const float offset{ 5.f };
+
+	// if going top
+	if (m_MovementDirection[1] <= 0)
+	{
+		// distance between top and wall = 0 or smaller
+		if (distance <= offset) 
+		{
+			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
+			m_Position[1] = offset; 
+
+			if (m_IsRotating)
+			{
+				m_PlayerVelocity = -m_PlayerVelocity;
+			}
+		}
+	}
+	else
+	{
+		// distance between bottom and wall = width or smaller
+		if (distance <= offset)
+		{
+			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
+			m_Position[1] = m_WindowDimentions.y - m_Dimensions - offset;
+
+			if (m_IsRotating)
+			{
+				m_PlayerVelocity = -m_PlayerVelocity;
+			}
 		}
 	}
 }
@@ -159,6 +216,11 @@ int Player::GetCurrentPillarIndex() const
 float Player::GetDimensions() const
 {
 	return m_Dimensions; 
+}
+
+TwoBlade Player::GetMovementDirection() const
+{
+	return m_MovementDirection; 
 }
 
 ThreeBlade Player::GetPosition() const

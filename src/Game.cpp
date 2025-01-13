@@ -17,7 +17,7 @@ Game::Game(const Window& window) :
 	m_MaxElapsedSeconds{ 0.1f },
 	m_Player{ 200.f, 200.f, Point2f{ window.width, window.height } },
 	m_Pickup{ Point2f{ window.width, window.height } },
-	m_Enemy{ ThreeBlade{ 400.f, 400.f, 0.f } } 
+	m_Enemy{ ThreeBlade{ 400.f, 400.f, 0.f }, Point2f{ window.width, window.height } } 
 {
 	InitializeGameEngine();
 	InitializeGameVariables();
@@ -210,22 +210,44 @@ void Game::CleanupGameEngine()
 
 void Game::ViewPortCollisionDetection(Entity& entity)
 {
+	const TwoBlade& entityDirection{ entity.GetMovementDirection() }; 
+	const ThreeBlade& entityPosition{ entity.GetPosition() };
+
+	float distance{}; 
+
 	for (OneBlade plane : m_ViewportPlanes)
 	{
-		const float distance{ utils::ComputeDistance(entity.GetPosition(), plane) };
+		if (plane == m_LeftPlane || plane == m_RightPlane)
+		{
+			if (entityDirection[0] <= 0) 
+			{
+				distance = utils::ComputeDistance(entityPosition, plane);
+			}
+			else
+			{
+				const float right{ entityPosition[0] + entity.GetDimensions() };
+				const ThreeBlade rightPos{ right, entityPosition[1], entityPosition[2] }; 
 
-		// Check if the current plane is left or right and has reflection logic
-		if (plane == m_RightPlane)
-		{
-			entity.PlaneCollisions(m_LeftPlane, distance);
+				distance = utils::ComputeDistance(rightPos, plane);
+			}
+
+			entity.LeftRightPlaneCollisions(m_LeftPlane, distance); 
 		}
-		else if (plane == m_TopPlane)
+		else if (plane == m_TopPlane || plane == m_BottomPlane)
 		{
-			entity.PlaneCollisions(m_BottomPlane, distance);
-		}
-		else
-		{
-			entity.PlaneCollisions(plane, distance);
+			if (entityDirection[1] <= 0) 
+			{
+				distance = utils::ComputeDistance(entityPosition, plane);
+			}
+			else
+			{
+				const float top{ entityPosition[1] + entity.GetDimensions() };
+				const ThreeBlade topPos{ entityPosition[1], top, entityPosition[2] }; 
+
+				distance = utils::ComputeDistance(topPos, plane);
+			}
+
+			entity.TopBottomPlaneCollisions(m_BottomPlane, distance); 
 		}
 	}
 }
@@ -256,7 +278,7 @@ void Game::Draw() const
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	m_Player.Draw();
-	m_Enemy.Draw(); 
+	m_Enemy.Draw();  
 	m_Pickup.Draw();
 
 	PillarManager::GetInstance().Draw(m_Player.GetCurrentPillarIndex());

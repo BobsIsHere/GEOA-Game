@@ -2,7 +2,8 @@
 #include "utils.h"
 #include "ScoreManager.h"
 
-Enemy::Enemy(ThreeBlade position)
+Enemy::Enemy(ThreeBlade position, Point2f window)  :
+	m_WindowDimentions{ window } 
 {
 	m_Dimensions = 30.f;
 	m_Color = Color4f{ 0.f, 0.f, 1.f, 1.f };
@@ -42,17 +43,64 @@ void Enemy::Draw() const
 	utils::FillRect(m_Position[0], m_Position[1], m_Dimensions, m_Dimensions);
 }
 
-void Enemy::PlaneCollisions(OneBlade plane, const float distance)
+void Enemy::LeftRightPlaneCollisions(OneBlade plane, const float distance)
 {
-	if (distance < m_Dimensions)
+	const float offset{ 5.f };
+
+	// if going left
+	if (m_MovementDirection[0] <= 0)
 	{
-		m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
+		// distance between left and wall = 0 or smaller
+		if (distance <= offset)
+		{
+			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
+			m_Position[0] = offset;
+		}
+	}
+	else
+	{
+		// distance between right and wall = width or smaller
+		if (distance <= offset)
+		{
+			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
+			m_Position[0] = m_WindowDimentions.x - m_Dimensions - offset;
+		}
+	}
+}
+
+void Enemy::TopBottomPlaneCollisions(OneBlade plane, const float distance)
+{
+	const float offset{ 5.f };
+
+	// if going top
+	if (m_MovementDirection[1] <= 0)
+	{
+		// distance between top and wall = 0 or smaller
+		if (distance <= offset)
+		{
+			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
+			m_Position[1] = offset;
+		}
+	}
+	else
+	{
+		// distance between bottom and wall = width or smaller
+		if (distance <= offset)
+		{
+			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
+			m_Position[1] = m_WindowDimentions.y - m_Dimensions - offset;
+		}
 	}
 }
 
 float Enemy::GetDimensions() const
 {
 	return m_Dimensions;
+}
+
+TwoBlade Enemy::GetMovementDirection() const
+{
+	return m_MovementDirection; 
 }
 
 TwoBlade Enemy::CheckEntityCollisions(const ThreeBlade& entity)

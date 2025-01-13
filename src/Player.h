@@ -24,10 +24,12 @@ public:
 	void PlayerKeyUpEvent(const SDL_KeyboardEvent& e);
 	void PlayerMouseDownEvent(const SDL_MouseButtonEvent& e);
 	
-	void PlaneCollisions(OneBlade plane, const float distance);  
+	void LeftRightPlaneCollisions(OneBlade plane, const float distance) override;  
+	void TopBottomPlaneCollisions(OneBlade plane, const float distance) override;  
 
 	int GetCurrentPillarIndex() const;
 	float GetDimensions() const override;
+	TwoBlade GetMovementDirection() const override;
 	ThreeBlade GetPosition() const;
 
 	void SetMovementDirection(const float directionMultiplier);
