@@ -10,11 +10,11 @@ Player::Player(float xPos, float yPos, Point2f window) :
 	m_IsRotating{ false }, 
 	m_CurrentPillarIndex{},
 	m_CooldownTimer{},
-	m_PlayerVelocity{ m_BaseVelocity }
+	m_PlayerVelocity{ TwoBlade{ 0, 0, 0, 0, 0, 1 } } 
 {
 	m_EntityDimensions = 40.f;
 	m_EntityColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
-	m_MovementDirection = m_BaseMovementDirection; 
+	m_MovementDirection = TwoBlade{ 1, 0, 0, 0, 0, 400 }; 
 	m_EntityPosition = ThreeBlade{ xPos, yPos, m_PlayerEnergy, 1 }; 
 	m_WindowDimentions = window;
 }
@@ -67,8 +67,8 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 		else
 		{
 			m_HasShiftBeenPressed = false; 
-			m_MovementDirection = m_BaseMovementDirection; 
-			m_PlayerVelocity = m_BaseVelocity;  
+			m_MovementDirection /= 2;  
+			m_PlayerVelocity /= 2;   
 			m_CooldownTimer = m_CooldownDuration;  
 		}
 	}

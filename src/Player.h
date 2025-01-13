@@ -54,8 +54,5 @@ private:
 	float m_PlayerEnergy = 100.f; 
 	float m_CooldownTimer;
 
-	const TwoBlade m_BaseVelocity = TwoBlade{ 0, 0, 0, 0, 0, 1 };
-	const TwoBlade m_BaseMovementDirection = TwoBlade{ 1, 0, 0, 0, 0, 400 }; 
-
 	TwoBlade m_PlayerVelocity;
 };
