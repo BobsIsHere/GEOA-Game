@@ -33,7 +33,7 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 		m_MovementDirection = utils::RotateBladeDirection(m_MovementDirection, rotationAngle);
 		m_PlayerVelocity = utils::RotateBladeDirection(m_PlayerVelocity, rotationAngle); 
 	}
-	else if (m_ShouldReflect)
+	else if (m_ShouldReflect && PillarManager::GetInstance().GetPillarAmount() != 0)
 	{
 		Motor transformationMotor{ utils::MakeTranslationMotor(m_MovementDirection, elapsedSec) };
 		m_EntityPosition = (-pillarPos * -transformationMotor * m_EntityPosition * ~transformationMotor * ~pillarPos).Grade3();

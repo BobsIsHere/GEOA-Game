@@ -87,7 +87,7 @@ private:
 /*
 Documentation of Flying Fish :
 	* -> geometric product
-	& -> inner product / join
+	& -> inner product
 	| -> outer product 
 	^ -> meet
 	~ -> inverse
