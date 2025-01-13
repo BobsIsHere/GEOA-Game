@@ -23,6 +23,7 @@ public:
 	void SpawnPillar(const ThreeBlade& position); 
 	void Update();
 	void Draw(size_t selectedPillarIndex) const;
+	void RemoveFirstPillar();
 
 	size_t GetPillarAmount() const;
 	ThreeBlade GetPillarPosition(size_t index) const;

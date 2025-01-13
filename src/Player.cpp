@@ -262,5 +262,13 @@ void Player::ClampToViewport()
 
 void Player::SpawnPillar(const ThreeBlade& spawnPosition)
 {
-	PillarManager::GetInstance().SpawnPillar(spawnPosition);
+	PillarManager& pillarManager = PillarManager::GetInstance();
+	const size_t maxPillars{ 3 };
+
+	if (pillarManager.GetPillarAmount() >= maxPillars)
+	{
+		pillarManager.RemoveFirstPillar(); 
+	}
+
+	pillarManager.SpawnPillar(spawnPosition); 
 }

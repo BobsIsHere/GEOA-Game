@@ -46,6 +46,15 @@ void PillarManager::Draw(size_t selectedPillarIndex) const
 	}
 }
 
+void PillarManager::RemoveFirstPillar()
+{
+	if (!m_Pillars.empty())
+	{
+		// Remove first pillar from container
+		m_Pillars.erase(m_Pillars.begin());
+	}
+}
+
 size_t PillarManager::GetPillarAmount() const
 {
 	return m_Pillars.size();
