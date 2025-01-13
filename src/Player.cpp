@@ -23,10 +23,6 @@ Player::~Player()
 {
 }
 
-void Player::Update(float elapsedSec)
-{
-}
-
 void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 {
 	if (m_IsRotating)

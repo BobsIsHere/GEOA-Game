@@ -208,29 +208,7 @@ void Game::CleanupGameEngine()
 	SDL_Quit();
 }
 
-void Game::ViewPortCollisionDetection(Player& entity, bool isRotating)
-{
-	for (OneBlade plane : m_ViewportPlanes) 
-	{
-		const float distance{ utils::ComputeDistance(entity.GetPosition(), plane)};
-
-		// Check if the current plane is left or right and has reflection logic
-		if (plane == m_RightPlane)   
-		{
-			entity.PlaneCollisions(m_LeftPlane, distance);
-		}
-		else if (plane == m_TopPlane)
-		{
-			entity.PlaneCollisions(m_BottomPlane, distance);
-		}
-		else
-		{
-			entity.PlaneCollisions(plane, distance);
-		}
-	}
-}
-
-void Game::ViewPortCollisionDetection(Enemy& entity, bool isRotating)
+void Game::ViewPortCollisionDetection(Entity& entity)
 {
 	for (OneBlade plane : m_ViewportPlanes)
 	{
@@ -255,8 +233,8 @@ void Game::ViewPortCollisionDetection(Enemy& entity, bool isRotating)
 void Game::Update(float elapsedSec)
 {
 	// Check for collision with the viewport
-	ViewPortCollisionDetection(m_Player, true);   
-	ViewPortCollisionDetection(m_Enemy, false);   
+	ViewPortCollisionDetection(m_Player);   
+	ViewPortCollisionDetection(m_Enemy);   
 
 	// Get current pillar index
 	const int currentPillarIndex{ m_Player.GetCurrentPillarIndex() };

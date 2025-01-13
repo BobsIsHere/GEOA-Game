@@ -14,7 +14,6 @@ public:
 	Entity(Entity&&) noexcept = default;
 	Entity& operator=(Entity&&) noexcept = default;
 
-	virtual void Update(float elapsedSec) = 0;
 	virtual void Draw() const = 0;
 	virtual void PlaneCollisions(OneBlade plane, const float distance) = 0;
 	virtual float GetDimensions() const = 0;

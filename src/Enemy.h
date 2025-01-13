@@ -15,7 +15,6 @@ public:
 	Enemy(Enemy&& other) = delete;
 	Enemy& operator=(Enemy&& other) = delete;
 
-	void Update(float elapsedSec) override;
 	void Update(float elapsedSec, Player& player);
 	void Draw() const override;
 	void PlaneCollisions(OneBlade plane, const float distance) override;

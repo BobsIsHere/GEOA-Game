@@ -17,7 +17,6 @@ public:
 	Player(Player&& other) = delete;
 	Player& operator=(Player&& other) = delete;
 	
-	void Update(float elapsedSec) override;
 	void Update(float elapsedSec, ThreeBlade pillarPos);
 	void Draw() const;
 

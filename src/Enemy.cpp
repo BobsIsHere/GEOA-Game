@@ -18,10 +18,6 @@ Enemy::~Enemy()
 {
 }
 
-void Enemy::Update(float elapsedSec)
-{
-}
-
 void Enemy::Update(float elapsedSec, Player& player)
 {
 	Motor transformationMotor{ utils::MakeTranslationMotor(m_MovementDirection, elapsedSec) };

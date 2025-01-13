@@ -9,6 +9,7 @@
 #include "Player.h"
 #include "Pillar.h"
 #include "Pickup.h"
+#include "Entity.h"
 #include "Enemy.h"
 
 class Game
@@ -56,8 +57,7 @@ private:
 	void InitializeGameEngine();
 	void InitializeGameVariables();
 	void CleanupGameEngine();
-	void ViewPortCollisionDetection(Player& entity, bool isRotating);
-	void ViewPortCollisionDetection(Enemy& entity, bool isRotating);
+	void ViewPortCollisionDetection(Entity& entity);
 
 	// DATA MEMBERS
 	// The window properties
