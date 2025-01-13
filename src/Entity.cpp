@@ -1,10 +1,10 @@
 #include "Entity.h"
 
 Entity::Entity() :
-	m_Dimensions{},
-	m_Color{},
+	m_EntityDimensions{},
+	m_EntityColor{},
 	m_MovementDirection{},
-	m_Position{}
+	m_EntityPosition{}
 {
 }
 

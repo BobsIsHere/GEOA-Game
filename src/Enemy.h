@@ -21,11 +21,12 @@ public:
 	void TopBottomPlaneCollisions(OneBlade plane, const float distance) override;
 
 	float GetDimensions() const override; 
+
 	TwoBlade GetMovementDirection() const override;
 	TwoBlade CheckEntityCollisions(const ThreeBlade& entity); 
 
 	ThreeBlade GetPosition() const override;
 
 private:
-	Point2f m_WindowDimentions; 
+
 };

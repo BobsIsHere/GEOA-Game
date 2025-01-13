@@ -22,9 +22,11 @@ public:
 	virtual ThreeBlade GetPosition() const = 0;
 	 
 protected:
-	float m_Dimensions;
+	float m_EntityDimensions;
 
-	Color4f m_Color;
+	Point2f m_WindowDimentions;
+	Color4f m_EntityColor;
+
 	TwoBlade m_MovementDirection;
-	ThreeBlade m_Position;
+	ThreeBlade m_EntityPosition; 
 };

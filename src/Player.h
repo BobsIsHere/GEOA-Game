@@ -26,14 +26,15 @@ public:
 	
 	void LeftRightPlaneCollisions(OneBlade plane, const float distance) override;  
 	void TopBottomPlaneCollisions(OneBlade plane, const float distance) override;  
-
-	int GetCurrentPillarIndex() const;
-	float GetDimensions() const override;
-	TwoBlade GetMovementDirection() const override;
-	ThreeBlade GetPosition() const;
-
 	void SetMovementDirection(const float directionMultiplier);
 	void IncreasePlayerEnergy(const float energy);
+
+	int GetCurrentPillarIndex() const;
+
+	float GetDimensions() const override;
+
+	TwoBlade GetMovementDirection() const override;
+	ThreeBlade GetPosition() const override;
 
 private:
 	void UpdatePlayerColor(); 
@@ -52,8 +53,6 @@ private:
 
 	float m_PlayerEnergy = 100.f; 
 	float m_CooldownTimer;
-
-	Point2f m_WindowDimentions;
 
 	const TwoBlade m_BaseVelocity = TwoBlade{ 0, 0, 0, 0, 0, 1 };
 	const TwoBlade m_BaseMovementDirection = TwoBlade{ 1, 0, 0, 0, 0, 400 }; 

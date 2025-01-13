@@ -10,13 +10,13 @@ Player::Player(float xPos, float yPos, Point2f window) :
 	m_IsRotating{ false }, 
 	m_CurrentPillarIndex{},
 	m_CooldownTimer{},
-	m_PlayerVelocity{ m_BaseVelocity }, 
-	m_WindowDimentions{ window } 
+	m_PlayerVelocity{ m_BaseVelocity }
 {
-	m_Dimensions = 40.f;
-	m_Color = Color4f{ 0.f, 1.f, 0.f, 1.f };
+	m_EntityDimensions = 40.f;
+	m_EntityColor = Color4f{ 0.f, 1.f, 0.f, 1.f };
 	m_MovementDirection = m_BaseMovementDirection; 
-	m_Position = ThreeBlade{ xPos, yPos, m_PlayerEnergy, 1 }; 
+	m_EntityPosition = ThreeBlade{ xPos, yPos, m_PlayerEnergy, 1 }; 
+	m_WindowDimentions = window;
 }
 
 Player::~Player()
@@ -28,7 +28,7 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	if (m_IsRotating)
 	{
 		const float rotationAngle{ 45.f * elapsedSec };
-		m_Position = utils::RotateAroundPillar(m_Position, pillarPos, m_PlayerVelocity, rotationAngle);
+		m_EntityPosition = utils::RotateAroundPillar(m_EntityPosition, pillarPos, m_PlayerVelocity, rotationAngle);
 
 		m_MovementDirection = utils::RotateBladeDirection(m_MovementDirection, rotationAngle);
 		m_PlayerVelocity = utils::RotateBladeDirection(m_PlayerVelocity, rotationAngle); 
@@ -36,16 +36,16 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	else if (m_ShouldReflect)
 	{
 		Motor transformationMotor{ utils::MakeTranslationMotor(m_MovementDirection, elapsedSec) };
-		m_Position = (-pillarPos * -transformationMotor * m_Position * ~transformationMotor * ~pillarPos).Grade3();
+		m_EntityPosition = (-pillarPos * -transformationMotor * m_EntityPosition * ~transformationMotor * ~pillarPos).Grade3();
 		ClampToViewport(); 
 
-		m_Position[2] *= -1; 
+		m_EntityPosition[2] *= -1; 
 		m_ShouldReflect = false;  
 	}
 	else
 	{
 		Motor transformationMotor{ utils::MakeTranslationMotor(m_MovementDirection, elapsedSec) };
-		m_Position = (transformationMotor * m_Position * ~transformationMotor).Grade3(); 
+		m_EntityPosition = (transformationMotor * m_EntityPosition * ~transformationMotor).Grade3(); 
 	}
 	
 	// Update the player color
@@ -60,9 +60,9 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	// Increase or decrease Player's energy
 	if (m_HasShiftBeenPressed)
 	{
-		if (m_Position[2] > m_PlayerMinEnergy)
+		if (m_EntityPosition[2] > m_PlayerMinEnergy)
 		{
-			m_Position[2] = std::max(m_PlayerMinEnergy, m_Position[2] - m_EnergyDrainSpeed * elapsedSec);
+			m_EntityPosition[2] = std::max(m_PlayerMinEnergy, m_EntityPosition[2] - m_EnergyDrainSpeed * elapsedSec);
 		}
 		else
 		{
@@ -74,24 +74,24 @@ void Player::Update(float elapsedSec, ThreeBlade pillarPos)
 	}
 	else
 	{
-		if (m_Position[2] < m_PlayerEnergy)
+		if (m_EntityPosition[2] < m_PlayerEnergy)
 		{
-			m_Position[2] = std::min(m_Position[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerEnergy);
+			m_EntityPosition[2] = std::min(m_EntityPosition[2] + m_EnergyDrainSpeed * elapsedSec, m_PlayerEnergy);
 		}
 	}
 }
 
 void Player::Draw() const
 {
-	utils::SetColor(m_Color);
-	utils::FillRect(m_Position[0], m_Position[1], m_Dimensions, m_Dimensions);
+	utils::SetColor(m_EntityColor);
+	utils::FillRect(m_EntityPosition[0], m_EntityPosition[1], m_EntityDimensions, m_EntityDimensions);
 }
 
 void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e)
 {
 	if (e.keysym.sym == SDLK_LSHIFT)
 	{
-		if (!m_HasShiftBeenPressed && m_CooldownTimer <= 0.0f && m_Position[2] > m_PlayerMinEnergy)
+		if (!m_HasShiftBeenPressed && m_CooldownTimer <= 0.0f && m_EntityPosition[2] > m_PlayerMinEnergy)
 		{
 			m_HasShiftBeenPressed = true;
 			m_PlayerVelocity *= 2;
@@ -149,7 +149,7 @@ void Player::LeftRightPlaneCollisions(OneBlade plane, const float distance)
 		if (distance <= offset)
 		{
 			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
-			m_Position[0] = offset; 
+			m_EntityPosition[0] = offset; 
 
 			if (m_IsRotating)
 			{
@@ -163,7 +163,7 @@ void Player::LeftRightPlaneCollisions(OneBlade plane, const float distance)
 		if (distance <= offset)
 		{
 			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
-			m_Position[0] = m_WindowDimentions.x - m_Dimensions - offset; 
+			m_EntityPosition[0] = m_WindowDimentions.x - m_EntityDimensions - offset; 
 
 			if (m_IsRotating)
 			{
@@ -184,7 +184,7 @@ void Player::TopBottomPlaneCollisions(OneBlade plane, const float distance)
 		if (distance <= offset) 
 		{
 			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
-			m_Position[1] = offset; 
+			m_EntityPosition[1] = offset; 
 
 			if (m_IsRotating)
 			{
@@ -198,7 +198,7 @@ void Player::TopBottomPlaneCollisions(OneBlade plane, const float distance)
 		if (distance <= offset)
 		{
 			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
-			m_Position[1] = m_WindowDimentions.y - m_Dimensions - offset;
+			m_EntityPosition[1] = m_WindowDimentions.y - m_EntityDimensions - offset;
 
 			if (m_IsRotating)
 			{
@@ -215,7 +215,7 @@ int Player::GetCurrentPillarIndex() const
 
 float Player::GetDimensions() const
 {
-	return m_Dimensions; 
+	return m_EntityDimensions; 
 }
 
 TwoBlade Player::GetMovementDirection() const
@@ -225,7 +225,7 @@ TwoBlade Player::GetMovementDirection() const
 
 ThreeBlade Player::GetPosition() const
 {
-	return m_Position;  
+	return m_EntityPosition;  
 }
 
 void Player::SetMovementDirection(const float directionMultiplier)
@@ -245,19 +245,19 @@ void Player::UpdatePlayerColor()
 	Color4f highEnergyColor = Color4f{ 0.0f, 1.0f, 0.0f, 1.0f };
 
 	// Calculate the energy ratio (0.0 to 1.0)
-	float energyRatio = (m_Position[2] - m_PlayerMinEnergy) / (m_PlayerEnergy - m_PlayerMinEnergy); 
+	float energyRatio = (m_EntityPosition[2] - m_PlayerMinEnergy) / (m_PlayerEnergy - m_PlayerMinEnergy); 
 
 	// Interpolate the color based on the energy ratio
-	m_Color.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r);
-	m_Color.g = lowEnergyColor.g + energyRatio * (highEnergyColor.g - lowEnergyColor.g);
-	m_Color.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b);
+	m_EntityColor.r = lowEnergyColor.r + energyRatio * (highEnergyColor.r - lowEnergyColor.r);
+	m_EntityColor.g = lowEnergyColor.g + energyRatio * (highEnergyColor.g - lowEnergyColor.g);
+	m_EntityColor.b = lowEnergyColor.b + energyRatio * (highEnergyColor.b - lowEnergyColor.b);
 }
 
 void Player::ClampToViewport()
 {
 	// Clamp the player position to the viewport
-	m_Position[0] = std::clamp(m_Position[0], m_Dimensions, static_cast<float>(m_WindowDimentions.x - m_Dimensions));
-	m_Position[1] = std::clamp(m_Position[1], m_Dimensions, static_cast<float>(m_WindowDimentions.y - m_Dimensions));
+	m_EntityPosition[0] = std::clamp(m_EntityPosition[0], m_EntityDimensions, static_cast<float>(m_WindowDimentions.x - m_EntityDimensions));
+	m_EntityPosition[1] = std::clamp(m_EntityPosition[1], m_EntityDimensions, static_cast<float>(m_WindowDimentions.y - m_EntityDimensions));
 }
 
 void Player::SpawnPillar(const ThreeBlade& spawnPosition)
