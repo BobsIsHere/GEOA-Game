@@ -20,6 +20,7 @@ public:
 	void Draw() const override;
 	void PlaneCollisions(OneBlade plane, const float distance) override;
 
+	float GetDimensions() const override; 
 	TwoBlade CheckEntityCollisions(const ThreeBlade& entity); 
 
 	ThreeBlade GetPosition() const override;

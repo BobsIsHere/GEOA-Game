@@ -52,6 +52,11 @@ void Enemy::PlaneCollisions(OneBlade plane, const float distance)
 	}
 }
 
+float Enemy::GetDimensions() const
+{
+	return m_Dimensions;
+}
+
 TwoBlade Enemy::CheckEntityCollisions(const ThreeBlade& entity)
 {
 	TwoBlade distance{ utils::ComputeDistance(m_Position, entity) };
