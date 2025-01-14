@@ -89,6 +89,8 @@ void Player::Draw() const
 
 void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e)
 {
+	const size_t pillarAmount{ PillarManager::GetInstance().GetPillarAmount() };
+
 	if (e.keysym.sym == SDLK_LSHIFT)
 	{
 		if (!m_HasShiftBeenPressed && m_CooldownTimer <= 0.0f && m_EntityPosition[2] > m_PlayerMinEnergy)
@@ -106,15 +108,16 @@ void Player::PlayerKeyDownEvent(const SDL_KeyboardEvent& e)
 
 	if (e.keysym.sym == SDLK_r)
 	{
-		m_IsRotating = !m_IsRotating;
+		if (pillarAmount > 0)
+		{
+			m_IsRotating = !m_IsRotating; 
+		}
 	}
 
 	if (e.keysym.sym == SDLK_q)
 	{
-		const size_t pillarAmount{ PillarManager::GetInstance().GetPillarAmount() };
-
 		// Switch between pillars
-		if (pillarAmount >= 0) 
+		if (pillarAmount > 0) 
 		{
 			// Increment and wrap around
 			m_CurrentPillarIndex = (m_CurrentPillarIndex + 1) % pillarAmount; 
