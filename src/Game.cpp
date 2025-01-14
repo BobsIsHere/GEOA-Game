@@ -235,6 +235,31 @@ void Game::ViewPortCollisionDetection(Entity& entity)
 		}
 		else if (plane == m_TopPlane || plane == m_BottomPlane)
 		{
+
+			//// If entity is of player class
+			//if (auto pPlayer = dynamic_cast<Player*>(&entity))
+			//{
+			//	auto totalDirection{ pPlayer->GetVelocity()[1] };
+			//	if (totalDirection == 0)
+			//	{
+			//		totalDirection = pPlayer->GetMovementDirection()[1];
+			//	}
+
+			//	if (totalDirection < 0)
+			//	{
+			//		distance = utils::ComputeDistance(entityPosition, plane);
+			//	}
+			//	else
+			//	{
+			//		const float top{ entityPosition[1] + entity.GetDimensions() };
+			//		const ThreeBlade topPos{ entityPosition[0], top, entityPosition[2] };
+
+			//		distance = utils::ComputeDistance(topPos, plane);
+			//	}
+
+			//	entity.TopBottomPlaneCollisions(m_BottomPlane, distance);
+			//}
+			
 			if (entityDirection[1] <= 0) 
 			{
 				distance = utils::ComputeDistance(entityPosition, plane);
@@ -242,12 +267,12 @@ void Game::ViewPortCollisionDetection(Entity& entity)
 			else
 			{
 				const float top{ entityPosition[1] + entity.GetDimensions() };
-				const ThreeBlade topPos{ entityPosition[1], top, entityPosition[2] }; 
+				const ThreeBlade topPos{ entityPosition[0], top, entityPosition[2] };
 
 				distance = utils::ComputeDistance(topPos, plane);
 			}
 
-			entity.TopBottomPlaneCollisions(m_BottomPlane, distance); 
+			entity.TopBottomPlaneCollisions(m_BottomPlane, distance);
 		}
 	}
 }

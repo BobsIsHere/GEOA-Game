@@ -34,6 +34,7 @@ public:
 	float GetDimensions() const override;
 
 	TwoBlade GetMovementDirection() const override;
+	TwoBlade GetVelocity() const;
 	ThreeBlade GetPosition() const override;
 
 private:

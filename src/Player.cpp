@@ -127,6 +127,8 @@ void Player::PlayerKeyUpEvent(const SDL_KeyboardEvent& e)
 	if (e.keysym.sym == SDLK_LSHIFT)
 	{
 		m_HasShiftBeenPressed = false;
+		m_PlayerVelocity /= 2;
+		m_MovementDirection /= 2;
 	}
 }
 
@@ -177,14 +179,14 @@ void Player::TopBottomPlaneCollisions(OneBlade plane, const float distance)
 {
 	const float offset{ 5.f };
 
-	// if going top
+	// if going bottom
 	if (m_MovementDirection[1] <= 0)
 	{
-		// distance between top and wall = 0 or smaller
-		if (distance <= offset) 
+		// distance between bottom and wall = 0 or smaller
+		if (distance <= offset)
 		{
 			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
-			m_EntityPosition[1] = offset; 
+			m_EntityPosition[1] = offset;
 
 			if (m_IsRotating)
 			{
@@ -194,7 +196,7 @@ void Player::TopBottomPlaneCollisions(OneBlade plane, const float distance)
 	}
 	else
 	{
-		// distance between bottom and wall = width or smaller
+		// distance between top and wall = height or smaller
 		if (distance <= offset)
 		{
 			m_MovementDirection = (plane * m_MovementDirection * ~plane).Grade2();
@@ -221,6 +223,11 @@ float Player::GetDimensions() const
 TwoBlade Player::GetMovementDirection() const
 {
 	return m_MovementDirection; 
+}
+
+TwoBlade Player::GetVelocity() const
+{
+	return m_PlayerVelocity;
 }
 
 ThreeBlade Player::GetPosition() const
